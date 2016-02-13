@@ -1,0 +1,254 @@
+################################
+[TIOJ] 1208. 第 K 大連續和
+################################
+
+:author: amoshyc
+
+.. sidebar:: Tags
+
+    - ``tag_merge_sort``
+    - ``tag_prefix``
+    - ``tag_binary_search``
+    - ``tag_two_pointers``
+
+.. contents:: TOC
+    :depth: 2
+
+
+***************************************************
+`題目 <http://tioj.ck.tp.edu.tw/problems/1208>`_
+***************************************************
+
+給定一個長度為 n 的整數陣列 a，與一正整數 k。
+求陣列的區間和中，第 k 大的是誰？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= n <= 20000
+    1 <= k <= n(n+1) / 2
+    -10000 <= a[i] <= +10000
+
+
+************************
+分析
+************************
+
+.. note:: 對答案二分搜，用前綴和與 merge_sort 來在 O(nlgn) 的時間判斷解的可行性。
+
+第 k 大數，即有 k-1 個比它小。於是我們設 ::
+
+    bool C(q) = 比 q 大的區間和的個數是否 > k-1
+
+則 C(q) 在解的空間上分布成 ::
+
+    ... 1 1 1 1 0 0 0 ...
+
+有單調性，所以可以二分搜。其中，最右邊的 1 的所在即為答案。
+
+實作時，直接將上界設為極大數，下界極小數。
+
+.. code-block:: cpp
+    :linenos:
+
+    int lb = n * (-10000) - 1;
+    int ub = n * (+10000);
+    while (ub - lb > 1) {
+        int mid = (lb + ub) / 2;
+        if (C(mid)) lb = mid;
+        else ub = mid;
+    }
+
+----------------------------------------------
+
+該如何實作 C(q) 呢？我們引入前綴和 ::
+
+    S[0] = 0
+    S[i] = 0 + A[0] + A[1] + ... + A[i - 1]
+    S[n] = 0 + A[0] + A[1] + ... + A[n - 1]
+
+則問題變成 ::
+
+    集合 [(i, j) | 0 <= i < j <= n, S[j] - S[i] > q] 的大小是否 > k - 1
+
+要如何求解這個呢？
+因為 A[i] 可能是負的，所以前綴和不單調，我們沒辦法再用二分搜來求解這個問題。
+既然 S[] 不單調，那我們就想辦法讓他變成單調的，至此，我們引入 merge_sort ::
+
+    對 S[] 進行 merge_sort，在 merge(l, m, r) 之前，
+    計算跨區間的 (i, j) | l <= i <= m, m < j <= r, S[j] - S[i] > q 的有幾個。
+    此數量加上對兩邊 S[l, m], S[m+1, r] 遞迴 merge_sort 所計算出來的數量，即為所求。
+
+.. code-block:: cpp
+    :linenos:
+
+    int merge_sort(int l, int r, int q) {
+        // merge_sort s[l, r]
+
+        if (l >= r) return 0;
+
+        int cnt = 0;
+        int m = (l + r) / 2;
+        cnt += merge_sort(l, m, q);
+        cnt += merge_sort(m + 1, r, q);
+
+        // compute the number of
+        // (i, j) | l <= i <= m, m < j <= r, S[j] - S[i] > q
+
+        // merge
+        int idx = l, i = l, j = m + 1;
+        while (i <= m && j <= r) {
+            if (s[i] < s[j]) t[idx++] = s[i++];
+            else t[idx++] = s[j++];
+        }
+        while (i <= m) t[idx++] = s[i++];
+        while (j <= r) t[idx++] = s[j++];
+        memcpy(s + l, t + l, sizeof(int) * (r - l + 1));
+
+        return cnt;
+    }
+
+----------------------------------------
+
+計算方法有兩種，一個是使用 upper_bound ::
+
+    j+ = x | x >= j （大於等於 j 的數）
+    j- = x | x < j  （小於 j 的數）
+
+    移項 S[j] - S[i] > q 得 S[j] > S[i] + q
+    因為在 merge 之前 S[l, m], S[m+1, r] 都是單調的，
+
+    所以針對每一項 S[i] | l <= i <= m，
+    在 S[m + 1, r] 中二分搜大於 S[i] + q 的第一項在哪，設此項為 S[j]
+    則 (i, j+) 這些 pair 都會滿足 S[j] - S[i] > q 的條件，共有 r - j + 1 個。
+
+寫成程式碼：
+
+.. code-block:: cpp
+    :linenos:
+
+    for (int i = l; i <= m; i++) {
+        int j = upper_bound(s + m + 1, s + r + 1, s[i] + q) - s;
+        cnt += r - j + 1;
+    }
+
+另一種方法是使用爬行法
+
+::
+
+    1. S[l, m] 是單調的，S[m+1, r] 也是單調的。
+    2. 當 s[j] - s[i] > q 時，s[j+] - s[i] 必 > q，s[j-] 必 < q
+    3. 如果 s[j] - s[i] > q，則要使 s[j'] - s[i+1] > q，j' 必 >= j
+
+所以爬行法是可行的，隨著 i 向後移動，j 也只會向後移動。
+
+.. code-block:: cpp
+    :linenos:
+
+    int j = m + 1;
+    for (int i = l; i <= m; i++) {
+        while (j <= r && s[j] - s[i] <= q) j++;
+        cnt += r - j + 1;
+    }
+
+-------------------------------------------
+
+這題這樣就可以解決了，整體時間為
+二分搜 + merge_sort + 爬行法 = O(lg(T) * nlgn)。其中 T 為解的範圍。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    const int max_n = 20000;
+
+    int n, k;
+    int a[max_n];
+    int S[max_n + 1]; // 前綴和
+    int s[max_n + 1]; // 用於排序的前綴和
+    int t[max_n + 1]; // 排序用的暫存陣列
+
+    int merge_sort(int l, int r, int q) {
+        // merge_sort s[l, r]
+        // return the size of
+        // [(i, j) | l <= i < j <= r, S[j] - S[i] > q]
+
+        if (l >= r) return 0;
+
+        int cnt = 0;
+        int m = (l + r) / 2;
+        cnt += merge_sort(l, m, q);
+        cnt += merge_sort(m + 1, r, q);
+
+        // upper_bound
+        // for (int i = l; i <= m; i++) {
+        //     int j = upper_bound(s + m + 1, s + r + 1, s[i] + q) - s;
+        //     cnt += r - j + 1;
+        // }
+
+        // 爬行法
+        int p = m + 1;
+        for (int i = l; i <= m; i++) {
+            while (p <= r && s[p] - s[i] <= q) p++;
+            cnt += r - p + 1;
+        }
+
+        // merge
+        int idx = l, i = l, j = m + 1;
+        while (i <= m && j <= r) {
+            if (s[i] < s[j]) t[idx++] = s[i++];
+            else t[idx++] = s[j++];
+        }
+        while (i <= m) t[idx++] = s[i++];
+        while (j <= r) t[idx++] = s[j++];
+        memcpy(s + l, t + l, sizeof(int) * (r - l + 1));
+
+        return cnt;
+    }
+
+    bool C(int q) {
+        // 比 q 大的區間和的個數是否 > k-1
+        // 即集合 [(i, j) | i < j, s[j] - s[i] > q] 的大小是否 > k - 1
+        // 因 S 本身不單調，所以使用 merge_sort 來產生單調陣列
+        memcpy(s, S, sizeof(S));
+        int cnt = merge_sort(0, n, q);
+        return cnt > k - 1;
+    }
+
+    int main() {
+        while (scanf("%d %d", &n, &k)) {
+            if (n == 0 && k == 0) break;
+
+            for (int i = 0; i < n; i++)
+                scanf("%d", &a[i]);
+
+            // 前綴和
+            S[0] = 0; // 補零，使 s[i] - s[0] = a[i] 可以被計算到
+            for (int i = 0; i < n; i++)
+                S[i + 1] = S[i] + a[i];
+
+            // 對答案二分搜
+            // C(m) = 比 m 大的區間和的個數是否 > k-1 個
+            // 1 1 1 1 0 0 0
+            // (lb, ub]
+            int lb = n * (-10000) - 1;
+            int ub = n * (+10000);
+            while (ub - lb > 1) {
+                int mid = (lb + ub) / 2;
+                if (C(mid)) lb = mid;
+                else ub = mid;
+            }
+
+            printf("%d\n", ub);
+        }
+        return 0;
+    }
