@@ -45,7 +45,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'OJProblemSolving'
+project = u"amoshyc's 題解"
 copyright = u'2016, amoshyc'
 
 # The version info for the project you're documenting, acts as replacement for
