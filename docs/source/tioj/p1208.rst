@@ -2,8 +2,6 @@
 [TIOJ] 1208. 第 K 大連續和
 ################################
 
-:author: amoshyc
-
 .. sidebar:: Tags
 
     - ``tag_merge_sort``

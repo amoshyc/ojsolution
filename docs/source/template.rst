@@ -2,8 +2,6 @@
 [Category] Title
 ########################
 
-:author: amoshyc
-
 .. sidebar:: Tags
 
     - ``tag_dfs``
