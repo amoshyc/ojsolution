@@ -16,6 +16,7 @@ Technique
 - tag_prefix
 - tag_suffix
 - tag_two_pointers
+- tag_constructive_algorithm
 
 ************************
 Data Structure

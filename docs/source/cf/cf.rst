@@ -6,3 +6,4 @@ CF (Codeforces)
     :maxdepth: 1
 
     [cfedu7] C. Not Equal on a Segment <cfedu7/pc.rst>
+    [cfedu7] D. Optimal Number Permutation <cfedu7/pd.rst>
