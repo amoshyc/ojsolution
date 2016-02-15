@@ -35,7 +35,8 @@ Specification
 
 .. note:: 矩陣快速冪
 
-設
+如果使用矩陣快速冪分別計算每一項，最後再加總，時間為 O(K * N^3 * lg(K))，
+會不會 TLE 不知道，但有更快的方法。設
 
 .. math::
 
@@ -73,7 +74,7 @@ Specification
 
     \begin{bmatrix} { S }_{ k } \\ { A }^{ k+1 } \end{bmatrix}\quad ={ \quad \begin{bmatrix} I & I \\ 0 & A \end{bmatrix} }^{ k }\begin{bmatrix} 0 \\ { A } \end{bmatrix}
 
-我們使用最後一個式子，使用矩陣快速冪即可求出答案。
+我們使用最後一個式子，使用矩陣快速冪即可求出答案。時間為 O(N^3 * lg(K))
 
 ************************
 AC Code
