@@ -1,0 +1,149 @@
+#####################################
+[POJ] 3233. Matrix Power Series
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_fast_pow``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=3233>`_
+******************************************************
+
+給定 NxN 矩陣 A，正整數 K，正整數 M，求 S = A^1 + A^2 + ... + A^K。
+輸出時每個元素要 mod M。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 30
+    1 <= K <= 10^9
+    1 <= M <= 10^4
+    0 <= A[i][j] <= 32768
+
+
+************************
+分析
+************************
+
+.. note:: 矩陣快速冪
+
+設
+
+.. math::
+
+    { S }_{ k }={ A }^{ 1 }+{ A }^{ 2 }+\dots +{ A }^{ k }
+
+則有：
+
+.. math::
+
+    { S }_{ k }={ S }_{ k-1 }+{ A }^{ k }
+
+嘗試使用矩陣快速冪，寫成矩陣型式：
+
+.. math::
+
+    \begin{bmatrix} { S }_{ k } \\ \quad \quad  \end{bmatrix}\quad =\quad \begin{bmatrix} I & I \\ \quad  & \quad  \end{bmatrix}\begin{bmatrix} { S }_{ k-1 } \\ { A }^{ k } \end{bmatrix}
+
+寫成遞迴：
+
+.. math::
+
+    \begin{bmatrix} { S }_{ k } \\ { A }^{ k+1 } \end{bmatrix}\quad =\quad \begin{bmatrix} I & I \\ \quad  & \quad  \end{bmatrix}\begin{bmatrix} { S }_{ k-1 } \\ { A }^{ k } \end{bmatrix}
+
+所以可得：
+
+.. math::
+
+    \begin{bmatrix} { S }_{ k } \\ { A }^{ k+1 } \end{bmatrix}\quad =\quad \begin{bmatrix} I & I \\ 0 & A \end{bmatrix}\begin{bmatrix} { S }_{ k-1 } \\ { A }^{ k } \end{bmatrix}
+
+即：
+
+.. math::
+
+    \begin{bmatrix} { S }_{ k } \\ { A }^{ k+1 } \end{bmatrix}\quad =\quad { \begin{bmatrix} I & I \\ 0 & A \end{bmatrix} }^{ k-1 }\begin{bmatrix} { S }_{ 1 } \\ { A }^{ 2 } \end{bmatrix}
+
+    \begin{bmatrix} { S }_{ k } \\ { A }^{ k+1 } \end{bmatrix}\quad ={ \quad \begin{bmatrix} I & I \\ 0 & A \end{bmatrix} }^{ k }\begin{bmatrix} 0 \\ { A } \end{bmatrix}
+
+我們使用最後一個式子，使用矩陣快速冪即可求出答案。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <vector>
+    using namespace std;
+
+    typedef vector<int> vec;
+    typedef vector<vec> mat;
+
+    int N, K, M;
+
+    mat mul(const mat& a, const mat& b) {
+        mat res(a.size(), vec(b[0].size(), 0));
+        for (int r = 0; r < a.size(); r++)
+            for (int c = 0; c < b[0].size(); c++)
+                for (int k = 0; k < b.size(); k++)
+                    res[r][c] = (res[r][c] + a[r][k] * b[k][c] % M) % M;
+
+        return res;
+    }
+
+    mat pow(const mat& a, int b) {
+        mat ans(a.size(), vec(a.size(), 0));
+        for (int i = 0; i < a.size(); i++) ans[i][i] = 1;
+
+        mat base = a;
+        while (b) {
+            if (b & 1) ans = mul(ans, base);
+            base = mul(base, base);
+            b >>= 1;
+        }
+
+        return ans;
+    }
+
+    int main() {
+        scanf("%d %d %d", &N, &K, &M);
+        mat A(N, vec(N, 0));
+        for (int r = 0; r < N; r++)
+            for (int c = 0; c < N; c++)
+                scanf("%d", &A[r][c]);
+
+        mat B(2 * N, vec(2 * N, 0));
+        for (int i = 0; i < N; i++)
+            B[i][i] = B[i][N + i] = 1;
+        for (int r = 0; r < N; r++)
+            for (int c = 0; c < N; c++)
+                B[N + r][N + c] = A[r][c];
+
+        mat C(2 * N, vec(N, 0));
+        for (int r = 0; r < N; r++)
+            for (int c = 0; c < N; c++)
+                C[N + r][c] = A[r][c];
+
+        mat D = pow(B, K);
+        mat E = mul(D, C);
+
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                if (c != 0) printf(" ");
+                printf("%d", E[r][c]);
+            }
+            puts("");
+        }
+
+        return 0;
+    }
