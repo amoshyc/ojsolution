@@ -11,3 +11,4 @@ CF (Codeforces)
 
     [cf342] A. Guest From the Past <cf342/pa.rst>
     [cf342] B. War of the Corporations <cf342/pb.rst>
+    [cf342] C. K-special Tables <cf342/pc.rst>
