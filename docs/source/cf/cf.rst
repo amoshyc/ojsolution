@@ -10,3 +10,4 @@ CF (Codeforces)
     [cfedu7] E. Ants in Leaves <cfedu7/pe.rst>
 
     [cf342] A. Guest From the Past <cf342/pa.rst>
+    [cf342] B. War of the Corporations <cf342/pb.rst>
