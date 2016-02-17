@@ -20,6 +20,10 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
+def setup(app):
+    print('add')
+    app.add_stylesheet('css/mine.css')
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -178,7 +182,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'OJProblemSolvingdoc'
+htmlhelp_basename = u"amoshyc's 題解 doc"
 
 
 # -- Options for LaTeX output ---------------------------------------------
