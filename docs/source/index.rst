@@ -6,7 +6,6 @@
     :maxdepth: 1
     :numbered: 1
 
-    cheatsheet
     tutorials/tutorials
     cf/cf
     poj/poj
