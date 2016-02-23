@@ -190,8 +190,8 @@ lb/ub:                               lb     ub
     int lb = a, ub = b;
     while (ub - lb > 1) {
         int mid = (lb + ub) / 2
-        if (C(mid)) ub = mid;
-        else lb = mid;
+        if (C(mid)) lb = mid;
+        else ub = mid;
     }
 
     // lb 即為最後一個 1 的所在
