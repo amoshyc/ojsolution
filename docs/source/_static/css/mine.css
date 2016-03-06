@@ -1,3 +1,8 @@
 ::selection {
     background-color: #64C6AB;
 }
+
+div[class^='highlight'] pre {
+    font-size: 14px;
+    line-height: 1.3;
+}
