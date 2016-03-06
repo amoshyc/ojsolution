@@ -5,6 +5,7 @@
 .. sidebar:: Tags
 
     - ``tag_fast_pow``
+    - ``tag_preprocess``
 
 .. contents:: TOC
     :depth: 2

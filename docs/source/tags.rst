@@ -18,6 +18,7 @@ Technique
 - tag_two_pointers
 - tag_constructive_algorithm
 - tag_fast_pow
+- tag_preprocess
 
 ************************
 Data Structure
