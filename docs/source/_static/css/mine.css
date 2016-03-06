@@ -2,6 +2,12 @@
     background-color: #64C6AB;
 }
 
+/*********************************************************
+    https://github.com/snide/sphinx_rtd_theme/issues/117
+    The order of the included files is avtually not that important, 
+    as long as the specificity of the CSS statement is higher: 
+    html body div.someclass ... > .someclass
+**********************************************************/
 html body div[class^='highlight'] pre {
     font-size: 13px;
     line-height: 1.3;

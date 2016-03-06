@@ -21,7 +21,9 @@ import sphinx_rtd_theme
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-
+def setup(app):
+    print('add')
+    app.add_stylesheet('css/mine.css')
 
 # -- General configuration ------------------------------------------------
 
@@ -261,9 +263,3 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
-
-# -------------------------------------------------------------------------
-def setup(app):
-    print('add')
-    app.add_stylesheet('css/mine.css')
