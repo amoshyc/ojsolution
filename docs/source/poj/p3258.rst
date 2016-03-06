@@ -5,6 +5,7 @@
 .. sidebar:: Tags
 
     - ``tag_binary_search``
+    - ``tag_greedy``
 
 .. contents:: TOC
     :depth: 2
