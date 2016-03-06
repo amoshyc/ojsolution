@@ -6,3 +6,4 @@ PTC 2015/12 第一場
     :maxdepth: 1
 
     pa.rst
+    pc.rst
