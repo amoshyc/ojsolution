@@ -2,7 +2,7 @@
     background-color: #64C6AB;
 }
 
-div[class^='highlight'] pre {
+html body div[class^='highlight'] pre {
     font-size: 13px;
     line-height: 1.3;
 }
