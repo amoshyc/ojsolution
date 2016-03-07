@@ -54,12 +54,12 @@ Specification
     從左至右迭代「起點終點外」的每個石頭 rocks[i]，
     若該石頭與前一個石頭的距離 < d，我們必需移除該石頭，才能使相鄰石頭的距離 >= d。
     我們計算總共有多少個石頭要移除，該個數必需 <= M。
-    
+
 實作時，有兩點要注意::
 
     1. 若 rocks[i - 1], rocks[i], rocks[i + 1] 中，rocks[i] 被移除了，
        那 rocks[i + 1] 的前一顆石頭是 rocks[i - 1]，而不是 rocks[i]。
-      
+
     2. 上述演算法沒考慮到終點與其前一個石頭。
        設中間那 N 個石頭中，最後面的那個石頭為 rocks[-2]，若與終點那石頭的距離 < d，
        則要移除的是 rocks[-2]，而不是終點的石頭，因為終點那個石頭是不能移除的。
@@ -75,8 +75,7 @@ C(d) 在解的空間 [0, L] 上的分佈為::
 
     ... 1 1 1 0 0 0 0 ...
 
-另外，存在全部都為 1 的情況，我們可以藉由調整上界來處理到這情形。
-
+另外，存在全部都為 1 的情況，我們可以預判掉這情形。
 
 ************************
 AC Code
@@ -90,14 +89,14 @@ AC Code
     #include <cstdio>
     #include <cstdlib>
     #include <cstring>
-    
+
     using namespace std;
-    
+
     const int MAX_N = 50000;
-    
+
     int L, N, M;
     int rocks[MAX_N + 2];
-    
+
     bool C(int d) {
         int cnt = 0;
         int prev = 0; // 前一個石頭是誰，初使值為起點 rocks[0]
@@ -107,39 +106,41 @@ AC Code
             else
                 prev = i; // 維護前一個石頭
         }
-        
+
         // 終點與其前一個的情況
         if (rocks[N + 1] - rocks[prev] < d) {
             cnt++;
             // prev = N + 1 // 後面沒石頭了，沒必要繼續維護
         }
-    
+
         return cnt <= M;
     }
-    
+
     int solve() {
         sort(rocks + 1, rocks + N + 1);
-    
+
+        if (C(L)) return L;
+
         // ... 1 1 1 1 0 0 0 ...
-        int lb = 0, ub = L + 1;
+        int lb = 0, ub = L;
         while (ub - lb > 1) {
             int mid = (lb + ub) / 2;
             if (C(mid)) lb = mid;
             else ub = mid;
         }
-    
+
         return lb;
     }
-    
+
     int main() {
         scanf("%d %d %d", &L, &N, &M);
         for (int i = 1; i <= N; i++)
             scanf("%d", &rocks[i]);
-        
+
         rocks[0] = 0;
         rocks[N+1] = L;
-    
+
         printf("%d\n", solve());
-    
+
         return 0;
     }
