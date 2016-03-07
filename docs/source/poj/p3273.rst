@@ -1,0 +1,133 @@
+#####################################
+[POJ] 3273. Monthly Expense
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_binary_search``
+    - ``tag_greedy``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=3273>`_
+******************************************************
+
+給定長度為 N 的正整數陣列 A[i]，請將他分解成 M 個不重疊區間，則每個區間中有其總和 S[j]，
+定義 s = max(S[j] for j in range(M)) （即 S[j] 中的最大值），
+請問在所有可能的分解法中，s 最小會是多少？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 10^5
+    1 <= M <= N
+    1 <= A[i] <= 10^4
+
+************************
+分析
+************************
+
+.. note:: 最大值最小化
+
+最大值最小化，標準的二分搜。
+二分搜教學請參 `這 <http://amoshycs.readthedocs.org/en/latest/tutorials/binary_search.html>`_
+
+判斷函式為::
+
+    bool C(int d) = 分解成 M 個區間後，可否使總和最大的那個區間的值 s >= d
+
+該函式有單調性，我們的目標是分隔點的 1 的位置::
+
+    ... 0 0 0 1 1 1 1 ...
+
+明顯地，s 越小越不容易達成。
+
+這個函式可以用 Greedy 實作::
+
+    儘量把一個區間的值塞滿，直到塞不下。
+    也就是說，從左至右迭代 A[i]，如果前一個區間的總和再加上 A[i] 會大於 d 的話，
+    則 A[i] 就是下個區間的起始點。最後看區間的數量是否 <= M
+
+----------------------------
+
+解的空間 [max(A[i]), sum(A[i])]。
+
+下界發生在 M = N 時，每一項自己都是一個區間，此時 s = max(A[i])。
+上界發生在 M = 1 時，每一項都在同一個區間裡，此時 s = sum(A[i])。
+
+C(d) 在解的空間上存在分布全為 1 的情況，即當 C(max(A[i])) = true 情形。
+可以預判掉，此時的答案就是 max(A[i])
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <algorithm>
+    #include <numeric>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+
+    using namespace std;
+
+    int N, M;
+    int money[100000];
+
+    bool C(int s) {
+        for (int i = 0; i < N; i++)
+            if (money[i] > s)
+                return false;
+
+        int cnt = 0; // 區間數量
+        int sum = 0; // 區間和
+        for (int i = 0; i < N; i++) {
+            if (sum + money[i] > s) { // 新區間
+                sum = money[i];
+                cnt++;
+            }
+            else { // 區間繼續
+                sum += money[i];
+            }
+        }
+
+        // 最後那個區間，前面沒有數到
+        cnt++;
+
+        return cnt <= M;
+    }
+
+    int solve() {
+        // (lb, ub]
+        int lb = *max_element(money, money + N);
+        int ub = accumulate(money, money + N, 0);
+
+        if (C(lb)) return lb;
+
+        while (ub - lb > 1) {
+            int mid = (ub + lb) / 2;
+            if (C(mid)) ub = mid;
+            else lb = mid;
+        }
+
+        return ub;
+    }
+
+    int main() {
+        scanf("%d %d", &N, &M);
+        for (int i = 0; i < N; i++)
+            scanf("%d", &money[i]);
+
+        printf("%d\n", solve());
+
+        return 0;
+    }
