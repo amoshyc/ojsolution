@@ -1,5 +1,5 @@
 ###################################################
-[ptc201512_1] C. Warehouse （倍增法）
+[ptc201512_1] C. Warehouse
 ###################################################
 
 .. sidebar:: Tags
@@ -31,7 +31,7 @@ Specification
     1 <= N <= 1000
     Q <= 50
     0 <= K <= 10^8
-    
+
 
 ************************
 分析
@@ -57,7 +57,7 @@ Specification
     8 步後 (next[3][x, y])
     16 步後 (next[4][x, y])
     ...
-    
+
 組出 K 步後在哪裡，每次詢問 O(lg(k))。
 
 ---------------------------------------------
@@ -78,20 +78,20 @@ AC Code
     #include <cstdio>
     #include <cstring>
     using namespace std;
-    
+
     const int MAX_N = 500;
     const int MAX_LOG_K = 27; // ceil(lg(10^8))
     const int dr[8] = {0, -1, -1, -1, 0, +1, +1, +1};
     const int dc[8] = {+1, +1, 0, -1, -1, -1, 0, +1};
-    
+
     int N, Q;
     int G[MAX_N * MAX_N];
     int next[MAX_LOG_K][MAX_N * MAX_N];
-    
+
     inline int e(int r, int c) { // encode
         return r * N + c;
     }
-    
+
     void init() {
         for (int r = 0; r < N; r++) {
             for (int c = 0; c < N; c++) {
@@ -107,7 +107,7 @@ AC Code
                 }
             }
         }
-        
+
         for (int i = 1; i < MAX_LOG_K; i++) {
             for (int r = 0; r < N; r++) {
                 for (int c = 0; c < N; c++) {
@@ -118,26 +118,26 @@ AC Code
             }
         }
     }
-    
+
     int query(int r, int c, int k) {
         int ans = e(r, c);
         int base = 0;
-        
+
         while (k != 0) {
             if (k & 1)
                 ans = next[base][ans];
             base++;
             k >>= 1;
         }
-        
+
         return ans;
     }
-    
+
     int main() {
         while (scanf("%d %d", &N, &Q) != EOF) {
             memset(G, -1, sizeof(G));
             memset(next, -1, sizeof(next));
-            
+
             for (int r = 0; r < N; r++) {
                 char input[N + 1];
                 scanf("%s", input);
@@ -146,9 +146,9 @@ AC Code
                     else G[e(r, c)] = input[c] - '1' + 0;
                 }
             }
-            
+
             init();
-            
+
             while (Q--) {
                 int r, c, k;
                 scanf("%d %d %d", &c, &r, &k);
@@ -156,6 +156,6 @@ AC Code
                 printf("%d %d\n", ans % N, ans / N);
             }
         }
-        
+
         return 0;
     }
