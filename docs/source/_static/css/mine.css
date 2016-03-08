@@ -1,14 +1,37 @@
+@import url(https://fonts.googleapis.com/css?family=Oxygen+Mono|Droid+Sans);
+
 ::selection {
-    background-color: #64C6AB;
+    background-color: #88D3AE;
 }
 
 /*********************************************************
     https://github.com/snide/sphinx_rtd_theme/issues/117
-    The order of the included files is avtually not that important, 
-    as long as the specificity of the CSS statement is higher: 
+    The order of the included files is avtually not that important,
+    as long as the specificity of the CSS statement is higher:
     html body div.someclass ... > .someclass
 **********************************************************/
+
+/*div that holds code*/
+html body div[class^='highlight'] {
+    /*border: none*/
+}
+
+/*code*/
 html body div[class^='highlight'] pre {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.3;
+    font-family: "Oxygen Mono","Droid Sans Mono","Liberation Mono",Consolas,"Lucida Console","DejaVu Sans Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
+    /*background-color: #F6F6F6;*/
+}
+
+/*``literal``*/
+.rst-content tt.literal, .rst-content tt.literal, .rst-content code.literal {
+    font-size: 13px;
+    border: none;
+    font-family: "Oxygen Mono","Droid Sans Mono","Liberation Mono",Consolas,"Lucida Console","DejaVu Sans Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
+}
+
+p {
+    font-size: 15px;
+    font-family: "Oxygen Mono","Droid Sans Mono","Liberation Mono",Consolas,"Lucida Console","DejaVu Sans Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
 }
