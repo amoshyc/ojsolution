@@ -12,5 +12,6 @@
     uva/uva
     ptc/ptc
     tioj/tioj
+    template/template
 
     tags
