@@ -13,6 +13,7 @@ Technique
 - tag_brute-force
 - tag_enum
 - tag_merge_sort
+- tag_sorting
 - tag_prefix
 - tag_suffix
 - tag_two_pointers
