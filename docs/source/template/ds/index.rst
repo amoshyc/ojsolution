@@ -6,3 +6,4 @@ Data Structure
     :maxdepth: 1
 
     dsu.rst
+    bit2d.rst
