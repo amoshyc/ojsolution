@@ -3,7 +3,7 @@ Template
 ########################
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
 
     Data Structure <ds/index.rst>
     Graph <graph/index.rst>
