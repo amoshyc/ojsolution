@@ -53,3 +53,9 @@ Graph
 - tag_prim
 - tag_dag
 - tag_tarjan_scc
+
+************************
+Other
+************************
+
+- tag_easy
