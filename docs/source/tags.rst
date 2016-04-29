@@ -20,6 +20,7 @@ Technique
 - tag_constructive_algorithm
 - tag_fast_pow
 - tag_preprocess
+- tag_huffman
 
 ************************
 Data Structure
