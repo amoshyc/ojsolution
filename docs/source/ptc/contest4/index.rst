@@ -11,3 +11,6 @@ ITSA 桂冠賽 2015
     pd.rst
     pe.rst
     pf.rst
+    pg.rst
+    ph.rst
+    pi.rst
