@@ -1,10 +1,11 @@
 ###################################################
-[Template] Segment Tree
+Segment Tree
 ###################################################
 
 .. sidebar:: Tags
 
     - ``tag_segment_tree``
+    - ``tag_template``
 
 .. contents:: TOC
     :depth: 2

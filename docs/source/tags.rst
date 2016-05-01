@@ -60,3 +60,4 @@ Other
 ************************
 
 - tag_easy
+- tag_template

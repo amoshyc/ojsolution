@@ -1,10 +1,11 @@
 ###################################################
-[Template] Kruskal's Algorithm
+Kruskal's Algorithm
 ###################################################
 
 .. sidebar:: Tags
 
     - ``tag_kruskal``
+    - ``tag_template``
 
 .. contents:: TOC
     :depth: 2

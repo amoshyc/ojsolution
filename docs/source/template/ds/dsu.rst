@@ -1,10 +1,11 @@
 ###################################################
-[Template] Disjoint Set 並查集
+Disjoint Set 並查集
 ###################################################
 
 .. sidebar:: Tags
 
     - ``tag_dsu``
+    - ``tag_template``
 
 .. contents:: TOC
     :depth: 2

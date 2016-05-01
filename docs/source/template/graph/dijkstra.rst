@@ -1,10 +1,11 @@
 ###################################################
-[Template] Dijkstra's Algorithm
+Dijkstra's Algorithm
 ###################################################
 
 .. sidebar:: Tags
 
     - ``tag_dijkstra``
+    - ``tag_template``
 
 .. contents:: TOC
     :depth: 2
