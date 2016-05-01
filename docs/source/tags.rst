@@ -47,7 +47,7 @@ Graph
 - tag_bfs
 - tag_dijkstra
 - tag_floyd_warshall
-- tag_shortest_path
+- tag_spfa
 - tag_mst
 - tag_scc
 - tag_kruskal
