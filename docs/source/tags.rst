@@ -47,6 +47,7 @@ Graph
 - tag_dfs
 - tag_bfs
 - tag_dijkstra
+- tag_bellman
 - tag_floyd_warshall
 - tag_spfa
 - tag_mst
