@@ -21,6 +21,7 @@ Technique
 - tag_fast_pow
 - tag_preprocess
 - tag_huffman
+- tag_implementation
 
 ************************
 Data Structure
