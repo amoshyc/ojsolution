@@ -17,7 +17,7 @@ BIT 2d
 .. code-block:: cpp
     :linenos:
 
-    ll bit[MAX_N + 1][MAX_N + 1]; // index start from 1
+    ll bit[MAX_N + 1][MAX_M + 1]; // index start from 1
 
     ll sum(int a, int b) {
         ll s = 0;
@@ -27,9 +27,9 @@ BIT 2d
         return s;
     }
 
-    void add(int a, int b, int x) {
+    void add(int a, int b, ll x) {
         for (int i = a; i <= N; i += (i & -i))
-            for (int j = b; j <= N; j += (j & -j))
+            for (int j = b; j <= M; j += (j & -j))
                 bit[i][j] += x;
     }
 
