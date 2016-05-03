@@ -11,6 +11,5 @@ DP
     cutting_sticks.rst
     lis.rst
 
-
 .. knapack_bounded.rst
 .. lcs.rst
