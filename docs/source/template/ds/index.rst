@@ -7,4 +7,5 @@ Data Structure
 
     dsu.rst
     seg.rst
+    bit.rst
     bit2d.rst

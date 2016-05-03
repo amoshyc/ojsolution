@@ -3,7 +3,8 @@ PTC (PTC & ITSA)
 ########################
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
+    contest3/index.rst
     contest4/index.rst
     ptc201512_1/index.rst
