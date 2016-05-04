@@ -57,6 +57,7 @@ Graph
 - tag_prim
 - tag_dag
 - tag_tarjan_scc
+- tag_min_cost_flow
 
 ************************
 Other
