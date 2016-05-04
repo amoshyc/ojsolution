@@ -1,8 +1,9 @@
 ########################
-TIOJ 建中 Online Judge
+Number
 ########################
 
 .. toctree::
     :maxdepth: 1
 
-    [1208] 第 K 大連續和 <p1208.rst>
+    fast_pow.rst
+    build_primes.rst
