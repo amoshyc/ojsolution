@@ -58,6 +58,7 @@ Graph
 - tag_dag
 - tag_tarjan_scc
 - tag_min_cost_flow
+- tag_bipartite_matching
 
 ************************
 Other
