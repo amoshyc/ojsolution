@@ -27,7 +27,7 @@ Min Cost Flow
         int to, cap, cost, rev;
     };
 
-    const int MAX_V = 2 * 100 + 10;
+    const int MAX_V = ...;
     int V;
     vector<Edge> g[MAX_V];
     int h[MAX_V];
@@ -44,6 +44,8 @@ Min Cost Flow
         int res = 0;
         fill(h, h + V, 0);
         while (f > 0) {
+            // dijkstra 找最小成本增廣路徑
+            // without h will reduce to SPFA = O(V*E)
             fill(d, d + V, INF);
             priority_queue< pii, vector<pii>, greater<pii> > pq;
 
@@ -65,17 +67,21 @@ Min Cost Flow
                 }
             }
 
+            // 找不到增廣路徑
             if (d[t] == INF) return -1;
 
+            // 維護 h[v]
             for (int v = 0; v < V; v++)
                 h[v] += d[v];
 
+            // 找瓶頸
             int bn = f;
             for (int v = t; v != s; v = prevv[v])
                 bn = min(bn, g[prevv[v]][preve[v]].cap);
 
+            // 更新剩餘圖
             f -= bn;
-            res += bn * h[t];
+            res += bn * h[t]; // SPFA: res += bn * d[t]
             for (int v = t; v != s; v = prevv[v]) {
                 Edge& e = g[prevv[v]][preve[v]];
                 e.cap -= bn;
@@ -89,4 +95,5 @@ Min Cost Flow
 模板驗證
 ************************
 
-`poj2195 <http://codepad.org/IVCbipKk>`_
+ - [最小費用流] `poj2195 <http://codepad.org/kGDEcbBW>`_
+ - [最大費用流] `poj3422 <http://codepad.org/1NjG4RQS>`_
