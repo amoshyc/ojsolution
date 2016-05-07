@@ -1,0 +1,190 @@
+#####################################
+[POJ] 3565. Ants
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_min_cost_flow``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=3565>`_
+******************************************************
+
+平面作標上，給定 N 個 colony 的作標與 N 個 tree 的作標，
+欲使一個 colony 連到一個 tree，且任二個兩連線之間不能交叉，請問該怎麼連？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 100
+    -10^4 <= x, y <= 10^4
+
+************************
+分析
+************************
+
+.. note:: 最小費用流或 KM 算法
+
+最小完全匹配保證了任兩條連線不相叉。可用反證法證。
+
+所以會想用最小費用流，但最小費用流的模板裡沒有說明要如何找出各點的配對。
+
+但也可以很容易的想到，在二分圖 G = (X + Y, E) 中
+對於每次找出的最小成本增廣路徑，除首尾外，一定會是一個在 X, Y 上交錯的路徑。
+利用這個特性，即可不斷的更新哪個點是配對哪個點。
+
+見程式碼中 81 ~ 86 行。
+
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+    :emphasize-lines: 81-86
+
+    #include <iostream>
+    #include <vector>
+    #include <queue>
+    #include <map>
+    #include <algorithm>
+    #include <functional>
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <cmath>
+    using namespace std;
+
+    // min cost flow template
+    #define st first
+    #define nd second
+
+    typedef pair<double, int> pii;
+    const double INF = 1e10;
+
+    struct Edge {
+        int to, cap;
+        double cost;
+        int rev;
+    };
+
+    const int MAX_V = 2 * 100 + 10;
+    int V;
+    vector<Edge> g[MAX_V];
+    double h[MAX_V];
+    double d[MAX_V];
+    int prevv[MAX_V];
+    int preve[MAX_V];
+
+    int match[MAX_V];
+
+    void add_edge(int u, int v, int cap, double cost) {
+        g[u].push_back((Edge){v, cap, cost, (int)g[v].size()});
+        g[v].push_back((Edge){u, 0, -cost, (int)g[u].size() - 1});
+    }
+
+    double min_cost_flow(int s, int t, int f) {
+        double res = 0;
+        fill(h, h + V, 0);
+        fill(match, match + V, -1);
+        while (f > 0) {
+            // dijkstra 找最小成本增廣路徑
+            // without h will reduce to SPFA = O(V*E)
+            fill(d, d + V, INF);
+            priority_queue< pii, vector<pii>, greater<pii> > pq;
+
+            d[s] = 0;
+            pq.push(pii(d[s], s));
+
+            while (!pq.empty()) {
+                pii p = pq.top(); pq.pop();
+                int v = p.nd;
+                if (d[v] < p.st) continue;
+                for (size_t i = 0; i < g[v].size(); i++) {
+                    const Edge& e = g[v][i];
+                    if (e.cap > 0 && d[e.to] > d[v] + e.cost + h[v] - h[e.to]) {
+                        d[e.to] = d[v] + e.cost + h[v] - h[e.to];
+                        prevv[e.to] = v;
+                        preve[e.to] = i;
+                        pq.push(pii(d[e.to], e.to));
+                    }
+                }
+            }
+
+            // 找不到增廣路徑
+            if (d[t] == INF) return -1;
+
+            // 維護 h[v]
+            for (int v = 0; v < V; v++)
+                h[v] += d[v];
+
+            // 找瓶頸
+            int bn = f;
+            for (int v = t; v != s; v = prevv[v])
+                bn = min(bn, g[prevv[v]][preve[v]].cap);
+
+            // find match
+            for (int v = prevv[t]; v != s; v = prevv[prevv[v]]) {
+                int u = prevv[v];
+                match[v] = u;
+                match[u] = v;
+            }
+
+            // 更新剩餘圖
+            f -= bn;
+            res += bn * h[t]; // SPFA: res += bn * d[t]
+            for (int v = t; v != s; v = prevv[v]) {
+                Edge& e = g[prevv[v]][preve[v]];
+                e.cap -= bn;
+                g[v][e.rev].cap += bn;
+            }
+        }
+        return res;
+    }
+    // end of template
+
+    double xs[MAX_V];
+    double ys[MAX_V];
+
+    int main() {
+        // colony: [0, N)
+        // tree: [N, 2*N)
+        int N;
+        scanf("%d", &N);
+        for (int i = 0; i < 2 * N; i++) {
+            scanf("%lf %lf", &xs[i], &ys[i]);
+        }
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                double dx2 = (xs[i] - xs[N + j]) * (xs[i] - xs[N + j]);
+                double dy2 = (ys[i] - ys[N + j]) * (ys[i] - ys[N + j]);
+                double dis = sqrt(dx2 + dy2);
+                add_edge(i, N + j, 1, dis);
+            }
+        }
+
+        int s_super = 2 * N;
+        int t_super = 2 * N + 1;
+        for (int i =0 ; i < N; i++) {
+            add_edge(s_super, i, 1, 0);
+            add_edge(N + i, t_super, 1, 0);
+        }
+
+        V = 2 * N + 2;
+        min_cost_flow(s_super, t_super, N);
+
+        for (int i = 0; i < N; i++) {
+            printf("%d\n", match[i] - N + 1);
+        }
+
+        return 0;
+    }
