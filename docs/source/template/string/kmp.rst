@@ -20,7 +20,7 @@ KMP
     const int MAX_Np = ...;
     int F[MAX_Np];
 
-    void failure_function(const string& P) {
+    void fail_func(const string& P) {
         const int Np = P.length();
         memset(F, 0, sizeof(F));
         int i = 0, j = -1; F[0] = -1;
