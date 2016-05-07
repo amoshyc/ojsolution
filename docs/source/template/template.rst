@@ -9,3 +9,4 @@ Template
     Graph <graph/index.rst>
     DP <dp/index.rst>
     Number <number/index.rst>
+    String <string/index.rst>
