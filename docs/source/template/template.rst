@@ -12,3 +12,4 @@ Template
     Number <number/index.rst>
     String <string/index.rst>
     Search <search/index.rst>
+    Other <other/index.rst>
