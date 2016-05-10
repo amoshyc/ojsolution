@@ -10,6 +10,7 @@ DP
     coin_change.rst
     cutting_sticks.rst
     lis.rst
+    tsp.rst
 
 .. knapack_bounded.rst
 .. lcs.rst
