@@ -22,6 +22,7 @@ Technique
 - tag_preprocess
 - tag_huffman
 - tag_implementation
+- tag_extgcd
 
 ************************
 Data Structure
