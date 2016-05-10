@@ -41,5 +41,3 @@
 ************************
 
 待測
-
-`uva10986 <http://codepad.org/nEGXuSYA>`_
