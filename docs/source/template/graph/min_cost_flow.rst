@@ -20,29 +20,33 @@ Min Cost Flow
     #define st first
     #define nd second
 
-    typedef pair<int, int> pii;
-    const int INF = 0x3f3f3f3f;
+    typedef pair<double, int> pii;
+    const double INF = 1e10;
 
     struct Edge {
-        int to, cap, cost, rev;
+        int to, cap;
+        double cost;
+        int rev;
     };
 
-    const int MAX_V = ...;
+    const int MAX_V = 2 * 100 + 10;
     int V;
     vector<Edge> g[MAX_V];
-    int h[MAX_V];
-    int d[MAX_V];
+    double h[MAX_V];
+    double d[MAX_V];
     int prevv[MAX_V];
     int preve[MAX_V];
+    // int match[MAX_V];
 
-    void add_edge(int u, int v, int cap, int cost) {
+    void add_edge(int u, int v, int cap, double cost) {
         g[u].push_back((Edge){v, cap, cost, (int)g[v].size()});
         g[v].push_back((Edge){u, 0, -cost, (int)g[u].size() - 1});
     }
 
-    int min_cost_flow(int s, int t, int f) {
-        int res = 0;
+    double min_cost_flow(int s, int t, int f) {
+        double res = 0;
         fill(h, h + V, 0);
+        fill(match, match + V, -1);
         while (f > 0) {
             // dijkstra 找最小成本增廣路徑
             // without h will reduce to SPFA = O(V*E)
@@ -79,6 +83,13 @@ Min Cost Flow
             for (int v = t; v != s; v = prevv[v])
                 bn = min(bn, g[prevv[v]][preve[v]].cap);
 
+            // // find match
+            // for (int v = prevv[t]; v != s; v = prevv[prevv[v]]) {
+            //     int u = prevv[v];
+            //     match[v] = u;
+            //     match[u] = v;
+            // }
+
             // 更新剩餘圖
             f -= bn;
             res += bn * h[t]; // SPFA: res += bn * d[t]
@@ -97,3 +108,4 @@ Min Cost Flow
 
  - [最小費用流] `poj2195 <http://codepad.org/kGDEcbBW>`_
  - [最大費用流] `poj3422 <http://codepad.org/1NjG4RQS>`_
+ - [配對] `poj 3565 <http://codepad.org/OpFifd7f>`_
