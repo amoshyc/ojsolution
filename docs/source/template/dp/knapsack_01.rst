@@ -26,6 +26,7 @@
     int N, W, w[i], v[i];
     int dp[MAX_W + 1];
 
+    dp[0] = 0;
     for (int i = 1; i <= N; i++) {
         for (int j = W; j >= w[i]; j--) {
             dp[j] = max(dp[j], dp[j - w[i]] + v[i]);
