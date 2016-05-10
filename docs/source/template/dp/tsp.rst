@@ -50,4 +50,4 @@ TSP
 模板驗證
 ************************
 
-`uva10986 <http://codepad.org/nEGXuSYA>`_
+待測
