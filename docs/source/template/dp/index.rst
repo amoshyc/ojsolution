@@ -13,5 +13,7 @@ DP
     cutting_sticks.rst
     lis.rst
     tsp.rst
+    partition.rst
+    repeat_combination.rst
 
 .. lcs.rst
