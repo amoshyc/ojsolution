@@ -23,6 +23,7 @@ Technique
 - tag_huffman
 - tag_implementation
 - tag_extgcd
+- tag_half_enum
 
 ************************
 Data Structure
