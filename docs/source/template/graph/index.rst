@@ -9,6 +9,7 @@ Graph
     dijkstra.rst
     spfa.rst
 
+    tarjan_scc.rst
     kruskal.rst
 
     bipartite_matching.rst
