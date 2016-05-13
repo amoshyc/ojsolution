@@ -7,3 +7,4 @@ Other
 
     include.rst
     vimrc.rst
+    api.rst
