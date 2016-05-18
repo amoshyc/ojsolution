@@ -17,17 +17,17 @@
 .. code-block:: cpp
     :linenos:
 
-    int N;
+    ll MAX_NUM;
     bool is_prime[N];
-    vector<int> primes;
+    vector<ll> primes;
 
     void init_primes() {
-        fill(is_prime, is_prime + N, true);
+        fill(is_prime, is_prime + MAX_NUM, true);
         // build primes under N
-        for (int i = 2; i < N; i++) {
+        for (ll i = 2; i < MAX_NUM; i++) {
             if (is_prime[i]) {
                 primes.push_back(i);
-                for (int j = i * i; j < N; j += i)
+                for (ll j = i * i; j < MAX_NUM; j += i)
                     is_prime[j] = false;
             }
         }
