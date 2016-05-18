@@ -5,6 +5,8 @@ CF (Codeforces)
 .. toctree::
     :maxdepth: 2
 
+    Eduactional Round #12 <cfedu12/index.rst>
+
     Eduactional Round #9 <cfedu9/index.rst>
 
     Educational Round #8 <cfedu8/index.rst>
