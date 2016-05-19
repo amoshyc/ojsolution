@@ -62,6 +62,7 @@ Graph
 - tag_max_flow
 - tag_min_cost_flow
 - tag_bipartite_matching
+- tag_connected_component
 
 ************************
 Other
