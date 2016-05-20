@@ -1,0 +1,182 @@
+#####################################
+[UVA] 10032. Tug of War
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_dp``
+    - ``tag_bitmask``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <https://goo.gl/Ne5zDk>`_
+******************************************************
+
+N 個人參加拔河比賽，每個人有其重量 w[i]，欲使二隊的人數最多只差一，雙方的重量和越接近越好。
+請問二隊的重量和分別是多少？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 100
+    1 <= w[i] <= 450
+
+************************
+分析
+************************
+
+.. note:: 三維 dp 優化
+
+這是 dp 大家應該都想得到，不過要寫出轉移方程式也有點難度。
+寫出來後，再用位元壓縮的技巧，空間壓掉一個維度，時間也壓掉一個維度。
+再用重覆使用陣列或交互使用陣列，空間壓到一維。
+
+
+.. raw:: html
+
+    <iframe src="https://docs.google.com/presentation/d/1ce2-Wf3m1kHra2fvuNCtQ-L1G4AcTeV3HmL5Gg1zMe0/embed?start=false&loop=false&delayms=3000" frameborder="0" width="480" height="299" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
+（投影片短網址 https://goo.gl/lWzJU6）
+
+************************
+AC Code 1
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    typedef long long ll;
+
+    const int MAX_N = 100;
+    const int MAX_W = 450 * 100;
+
+    int w[MAX_N + 1];
+    ll dp[MAX_W / 2 + 1];
+
+    int main() {
+        ios::sync_with_stdio(false);
+        cin.tie(0);
+
+        int TC; cin >> TC;
+        for (int tc = 0; tc < TC; tc++) {
+            if (tc != 0) cout << "\n";
+
+            int N; cin >> N;
+            for (int i = 1; i <= N; i++)
+                cin >> w[i];
+
+            ll W = accumulate(w + 1, w + N + 1, 0ll);
+
+            memset(dp, 0, sizeof(dp));
+
+            dp[0] = 1;
+            for (int i = 1; i <= N; i++) {
+                for (int j = W / 2; j >= w[i]; j--) {
+                    dp[j] |= (dp[j - w[i]] << 1);
+                }
+            }
+
+
+            if (N & 1) {
+                for (int j = W / 2; j >= 0; j--) {
+                    ll flag1 = (1ll << (N / 2));
+                    ll flag2 = (1ll << (N / 2 + 1));
+                    if ((dp[j] & flag1) || (dp[j] & flag2)) {
+                        cout << j << " " << W - j << "\n";
+                        break;
+                    }
+                }
+            }
+            else {
+                for (int j = W / 2; j >= 0; j--) {
+                    if (dp[j] & (1ll << (N / 2))) {
+                        cout << j << " " << W - j << "\n";
+                        break;
+                    }
+                }
+            }
+        }
+
+        return 0;
+    }
+
+
+************************
+AC Code 2
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    typedef long long ll;
+
+    const int MAX_N = 100;
+    const int MAX_W = 450 * 100;
+
+    int w[MAX_N + 1];
+    ll dp[2][MAX_W / 2 + 1];
+
+    int main() {
+        ios::sync_with_stdio(false);
+        cin.tie(0);
+
+        int TC; cin >> TC;
+        for (int tc = 0; tc < TC; tc++) {
+            if (tc != 0) cout << "\n";
+
+            int N; cin >> N;
+            for (int i = 1; i <= N; i++)
+                cin >> w[i];
+
+            ll W = accumulate(w + 1, w + N + 1, 0ll);
+
+            memset(dp, 0, sizeof(dp));
+
+            ll *pre = dp[0];
+            ll *cur = dp[1];
+            pre[0] = 1;
+            for (int i = 1; i <= N; i++) {
+                for (int j = 0; j <= W / 2; j++) {
+                    if (j - w[i] < 0)
+                        cur[j] = pre[j];
+                    else
+                        cur[j] = ((pre[j - w[i]] << 1) | pre[j]);
+                }
+                swap(cur, pre);
+            }
+            swap(cur, pre);
+
+            if (N & 1) {
+                for (int j = W / 2; j >= 0; j--) {
+                    ll flag1 = (1ll << (N / 2));
+                    ll flag2 = (1ll << (N / 2 + 1));
+                    if ((cur[j] & flag1) || (cur[j] & flag2)) {
+                        cout << j << " " << W - j << "\n";
+                        break;
+                    }
+                }
+            }
+            else {
+                for (int j = W / 2; j >= 0; j--) {
+                    if (cur[j] & (1ll << (N / 2))) {
+                        cout << j << " " << W - j << "\n";
+                        break;
+                    }
+                }
+            }
+        }
+
+        return 0;
+    }

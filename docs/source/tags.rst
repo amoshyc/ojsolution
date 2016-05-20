@@ -24,6 +24,7 @@ Technique
 - tag_implementation
 - tag_extgcd
 - tag_half_enum
+- tag_bitmask
 
 ************************
 Data Structure
