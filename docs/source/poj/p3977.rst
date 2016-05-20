@@ -1,0 +1,129 @@
+#####################################
+[POJ] 3977. Subset
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_half_enum``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=3977>`_
+******************************************************
+
+給定長度為 N 的序列 a[i]，從中選出一些數形成子序列 b[i]，請最小化 abs(sum(b[i]))。
+輸出為 abs(sum(b[i])) 及 b 的長度。若 b 有多重可能，請輸出長度最小的。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 35
+    0 <= abs(a[i]) <= 10^15
+
+************************
+分析
+************************
+
+.. note:: 折半完全列舉，用 vector
+
+N 這麼小，明顯是折半完全列舉的題目。
+窮舉序列前 1/2 能產生的所有總和 (s1)，也窮舉後 1/2 能產生的所有總和 (s2)。
+解要嘛是發生在 s1 中，或發生中 s2 中，或發生在 s1 選一些，s2 也選一些。
+
+針對第三者，可以枚舉 s1[i]，在 s2 中二分搜能使 abs(s1[i] + s2[j]) 最小化的值。
+該值只可能是略大於 -s1[i] 的值，或略小於 -s1[i] 的值，或等於 -s1[i] 的值。
+可以直接用 lower_bound 來實作。
+
+直接看 code 吧。
+
+------------------------
+
+折半完全列的題目都不好寫啊…話說這題的時限竟然是 30s，這是我看過最長的…
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    using namespace std;
+
+    #define st first
+    #define nd second
+
+    typedef long long ll;
+    typedef pair<ll, int> pli; // <sum, num>
+    typedef vector<pli>::iterator it_t;
+
+    const int MAX_N = 35;
+    int N;
+    ll A[MAX_N];
+    vector<pli> s1, s2;
+    pli ans;
+
+    void dfs(vector<pli>& v, int i, const int end, ll sum, int cnt) {
+        if (i == end) {
+            if (cnt != 0)
+                v.push_back(pli(sum, cnt));
+            return;
+        }
+
+        dfs(v, i + 1, end, sum + A[i], cnt + 1);
+        dfs(v, i + 1, end, sum, cnt);
+    }
+
+    void update(ll s, int num) {
+        if (num == 0) return;
+        if (s < 0) s = -s;
+
+        pli q(s, num);
+        if (q < ans)
+            ans = q;
+    }
+
+    int main() {
+        while (scanf("%d", &N)) {
+            if (N == 0) break;
+
+            s1.clear();
+            s2.clear();
+            ans = pli(ll(1e18), 0x3f3f3f3f);
+
+            for (int i = 0; i < N; i++)
+                scanf("%lld", &A[i]);
+
+            dfs(s1, 0, N / 2, 0, 0);
+            dfs(s2, N / 2, N, 0, 0);
+
+            // 解要嘛是只從左邊選一些，要嘛是只從右邊選一些，要嘛是左邊右邊各選一些
+            // 使用 map : 23s
+            // 使用 vector : 1.5s
+            for (it_t it = s1.begin(); it != s1.end(); ++it)
+                update(it->st, it->nd);
+            for (it_t it = s2.begin(); it != s2.end(); ++it)
+                update(it->st, it->nd);
+
+            sort(s2.begin(), s2.end());
+            for (it_t i = s1.begin(); i != s1.end(); ++i) {
+                it_t j = lower_bound(s2.begin(), s2.end(), pli(-(i->st), 0));
+                if (j != s2.end())
+                    update((i->st) + (j->st), (i->nd) + (j->nd));
+                if (j-- != s2.begin())
+                    update((i->st) + (j->st), (i->nd) + (j->nd));
+            }
+
+            printf("%lld %d\n", ans.st, ans.nd);
+        }
+        return 0;
+    }
