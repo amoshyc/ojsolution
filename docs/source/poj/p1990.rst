@@ -1,0 +1,138 @@
+#####################################
+[POJ] 1990. MooFest
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_bit``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=1990>`_
+******************************************************
+
+在數線上，有 N 隻奶牛位於 p[i]，每隻牛有權重 v[i]。
+任兩隻相異的奶牛溝通的成本為他們之間的距離乘以 max(v[i], v[j])。
+請問使所有牛之間（兩兩之間）都溝通的成本最小為何？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 20000
+    1 <= p[i], v[i] <= 20000
+
+************************
+分析
+************************
+
+.. note:: 二個 BIT
+
+直接 O(N^2) 枚舉明顯不行，轉個想法，枚舉所有奶牛，針對每隻奶牛 i 計算::
+
+    與權重小於 v[i] 的所有奶牛溝通的總成本為何
+
+這可以利用 2 個 BIT 來加速::
+
+    sum(bit_n, p[i]) 統計位置 p[i] 之前（含）有多少奶牛
+    sum(bit_p, p[i]) 統計位置 p[i] 之前（含）的奶牛位置和
+
+由權重小的奶牛往權重大的奶牛枚舉，枚舉時，記得更新 bit::
+
+    add(bit_n, p[i], 1)
+    add(bit_p, p[i], p[i])
+
+枚舉到第 i 個時，我們可以知道在牠左邊及右邊各有多少權重 <= v[i] 的奶牛，
+例如，左邊就是目前 bit_n 中 p[i] 左邊有多少奶牛::
+
+    ll nleft = sum(bit_n, p[i] - 1)
+    ll nright = i - nleft
+
+也可以知道，奶牛 i 左邊及右邊，權重 <= v[i] 的奶牛的位置總和，同樣利用 bit 簡單地推出來::
+
+    ll sl = nleft * p[i] - sum(bit_p, p[i] - 1)
+    ll sr = sum(bit_p, MAX_R + 1) - sum(bit_p, p[i]) - nright * p[i]
+
+所以，奶牛 i 跟所有權重小於她的奶牛溝通的成本為::
+
+    nleft * sl + nright * sr
+
+整理時間為 O(N * lg(N))
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <map>
+    #include <algorithm>
+    using namespace std;
+
+    #define st first
+    #define nd second
+    typedef long long ll;
+    typedef pair<int, int> pii; // <v, pos>
+
+    const int MAX_N = 20000;
+    const int MAX_R = 20000;
+    int N;
+    pii cows[MAX_N];
+
+    ll bit_n[MAX_N + 1];
+    ll bit_p[MAX_N + 1];
+
+    int sum(ll* bit, int i) {
+        int s = 0;
+        while (i > 0) {
+            s += bit[i];
+            i -= (i & -i);
+        }
+        return s;
+    }
+
+    void add(ll* bit, int i, int x) {
+        while (i <= MAX_R) {
+            bit[i] += x;
+            i += (i & -i);
+        }
+    }
+
+    int main() {
+        scanf("%d", &N);
+        for (int i = 0; i < N; i++) {
+            scanf("%d %d", &cows[i].st, &cows[i].nd);
+        }
+
+        sort(cows, cows + N);
+
+        ll ans = 0;
+        for (int i = 0; i < N; i++) {
+            int v = cows[i].st;
+            int pos = cows[i].nd;
+
+            ll nleft = sum(bit_n, pos - 1);
+            ll nright = i - nleft;
+
+            ll sleft = v * (nleft * pos - sum(bit_p, pos - 1));
+            ll sright = v * (sum(bit_p, MAX_R + 1) - sum(bit_p, pos) - nright * pos);
+
+            ans += sleft + sright;
+
+            add(bit_n, pos, 1);
+            add(bit_p, pos, pos);
+        }
+
+        printf("%lld\n", ans);
+
+        return 0;
+    }
