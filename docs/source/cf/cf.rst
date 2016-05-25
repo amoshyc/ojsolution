@@ -13,6 +13,8 @@ CF (Codeforces)
 
     Educational Round #7 <cfedu7/index.rst>
 
+    Regular Round #353 <cf353/index.rst>
+
     Regular Round #346 <cf346/index.rst>
 
     Regular Round #343 <cf343/index.rst>
