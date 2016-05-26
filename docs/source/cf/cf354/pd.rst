@@ -182,6 +182,7 @@ AC Code
         queue<t4i> q;
 
         q.push(t4i(SR, SC, 0, 0));
+        vis[SR][SC][0] = true;
 
         while (!q.empty()) {
             t4i v = q.front(); q.pop();
