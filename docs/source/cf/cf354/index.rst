@@ -13,3 +13,4 @@ CF #354
     pb.rst
     pc.rst
     pd.rst
+    pe.rst
