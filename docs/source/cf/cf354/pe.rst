@@ -81,9 +81,6 @@ Specification
     ll s = 0;
     for (int i = N; i >= 0; i--) {
         s = s * K + a[i];
-
-        if (abs(s) > ll(1e9))
-            return false;
     }
 
 過程中，s 的值是::
@@ -117,7 +114,7 @@ Specification
     即
     abs( 式子 (N-1) ) <= 10^4
 
-再重覆上述過程，移項，同除 K，可得::
+再重覆上述過程，移項（接下來是 a[1]），同除 K，可得::
 
     abs( 式子 (N-2) ) <= 10^4 * 2
     abs( 式子 (N-3) ) <= 10^4 * 3
