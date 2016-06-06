@@ -31,7 +31,7 @@ BIT
     }
 
     void add(int i, int x) {
-        while (i <= MAX_R) {
+        while (i <= MAX_N) {
             bit[i] += x;
             i += (i & -i);
         }
