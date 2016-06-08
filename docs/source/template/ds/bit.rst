@@ -17,8 +17,9 @@ BIT
 .. code-block:: cpp
     :linenos:
 
-    const int MAX_N = 20000;
-    ll bit[MAX_N + 1];
+    const int MAX_R = 20000;
+    int R;
+    ll bit[MAX_R + 1];
 
     int sum(int i) {
         ll s = 0;
@@ -30,7 +31,7 @@ BIT
     }
 
     void add(int i, ll x) {
-        while (i <= MAX_N) {
+        while (i <= R) {
             bit[i] += x;
             i += (i & -i);
         }
