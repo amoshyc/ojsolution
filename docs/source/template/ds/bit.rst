@@ -22,7 +22,7 @@ BIT
     ll bit[MAX_N + 1];
 
     int sum(int i) {
-        int s = 0;
+        ll s = 0;
         while (i > 0) {
             s += bit[i];
             i -= (i & -i);
@@ -30,7 +30,7 @@ BIT
         return s;
     }
 
-    void add(int i, int x) {
+    void add(int i, ll x) {
         while (i <= MAX_R) {
             bit[i] += x;
             i += (i & -i);
