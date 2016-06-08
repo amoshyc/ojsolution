@@ -18,7 +18,6 @@ BIT
     :linenos:
 
     const int MAX_N = 20000;
-    int N;
     ll bit[MAX_N + 1];
 
     int sum(int i) {
@@ -31,7 +30,7 @@ BIT
     }
 
     void add(int i, ll x) {
-        while (i <= MAX_R) {
+        while (i <= MAX_N) {
             bit[i] += x;
             i += (i & -i);
         }
