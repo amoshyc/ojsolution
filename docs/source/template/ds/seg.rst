@@ -20,7 +20,7 @@ Segment Tree
     const int MAX_N = 100000;
     const int MAX_NN = (1 << 20); // should be bigger than MAX_N
 
-    int N, M;
+    int N;
     ll inp[MAX_N];
 
     int NN;
@@ -103,4 +103,5 @@ Segment Tree
 模板驗證
 ************************
 
+`poj3264 <http://codepad.org/rQdI5Xv6>`_
 `poj3468 <http://codepad.org/ITp1iOPE>`_
