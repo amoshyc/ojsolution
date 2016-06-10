@@ -17,13 +17,18 @@ Segment Tree
 .. code-block:: cpp
     :linenos:
 
-    int nn;
-    ll seg[2 * max_nn - 1];
-    ll lazy[2 * max_nn - 1];
-    // lazy[u] != 0 : the subtree of u (u not included) is not up-to-date
+    const int MAX_N = 100000;
+    const int MAX_NN = (1 << 20); // should be bigger than MAX_N
+
+    int N, M;
+    ll inp[MAX_N];
+
+    int NN;
+    ll seg[2 * MAX_NN - 1];
+    ll lazy[2 * MAX_NN - 1]; // lazy[u] != 0 : the subtree of u (u not included) is not up-to-date
 
     void seg_gather(int u) {
-        seg[u] = seg[u * 2 + 1] + seg[u * 2 + 2]; // sum
+        seg[u] = seg[u * 2 + 1] + seg[u * 2 + 2];
     }
 
     void seg_push(int u, int l, int m, int r) {
@@ -38,23 +43,22 @@ Segment Tree
     }
 
     void seg_init() {
-        nn = 1;
-        while (nn < n)
-            nn *= 2;
+        NN = 1;
+        while (NN < N)
+            NN *= 2;
 
-        memset(seg, 0, sizeof(seg));
-        memset(lazy, 0, sizeof(lazy));
-        // memcpy(seg + nn - 1, inp, sizeof(ll) * n);
+        memset(seg, 0, sizeof(seg));    // val that won't affect result
+        memset(lazy, 0, sizeof(lazy));  // val that won't affect result
+        memcpy(seg + NN - 1, inp, sizeof(ll) * N); // fill in leaves
     }
 
-    void seg_build(int u, int l, int r) {
-        if (u >= nn - 1) { // leaf
-            seg[u] = inp[u - nn + 1];
+    void seg_build(int u) {
+        if (u >= NN - 1) { // leaf
             return;
         }
 
-        seg_build(u * 2 + 1, l, (l + r) / 2);
-        seg_build(u * 2 + 2, (l + r) / 2, r);
+        seg_build(u * 2 + 1);
+        seg_build(u * 2 + 2);
         seg_gather(u);
     }
 
@@ -99,4 +103,4 @@ Segment Tree
 模板驗證
 ************************
 
-`poj3468 <https://ideone.com/PBzsZ8>`_
+`poj3468 <http://codepad.org/ITp1iOPE>`_
