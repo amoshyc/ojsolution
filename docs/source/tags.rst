@@ -38,6 +38,7 @@ Data Structure
 - tag_queue
 - tag_deque
 - tag_map
+- tag_sparse_table
 
 ************************
 String
