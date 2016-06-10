@@ -103,5 +103,5 @@ Segment Tree
 模板驗證
 ************************
 
-`poj3264 <http://codepad.org/rQdI5Xv6>`_
-`poj3468 <http://codepad.org/ITp1iOPE>`_
+ - [不用更新] `poj3264 <http://codepad.org/rQdI5Xv6>`_
+ - [延遲標記] `poj3468 <http://codepad.org/ITp1iOPE>`_
