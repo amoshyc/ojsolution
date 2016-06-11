@@ -11,6 +11,7 @@ POJ (PKU Online Judge)
     p3258.rst
     p3273.rst
     p3264.rst
+    p3368.rst
     p3468.rst
     p3565.rst
     p3977.rst
