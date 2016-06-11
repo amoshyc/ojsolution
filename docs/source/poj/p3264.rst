@@ -40,7 +40,7 @@ Specification
 直接看 code 吧。
 
 ************************
-AC Code 2
+AC Code 1
 ************************
 
 .. code-block:: cpp
@@ -133,7 +133,7 @@ AC Code 2
     }
 
 ************************
-AC Code 1
+AC Code 2
 ************************
 
 .. code-block:: cpp
