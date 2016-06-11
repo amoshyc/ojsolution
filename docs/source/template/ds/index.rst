@@ -7,5 +7,6 @@ Data Structure
 
     dsu.rst
     seg.rst
+    sparse_table.rst
     bit.rst
     bit2d.rst
