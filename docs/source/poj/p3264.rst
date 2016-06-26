@@ -1,0 +1,205 @@
+#####################################
+[POJ] 3264. Balanced Lineup
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_segment_tree``
+    - ``tag_sparse_table``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=3264>`_
+******************************************************
+
+N 隻牛排成一列，每隻牛有高度 H[i]，Q 筆詢問，每筆詢問是一個區間，請輸出區間中的最大高度差。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 5 * 10^4
+    1 <= Q <= 2 * 10^5
+    1 <= H[i] <= 10^6
+
+************************
+分析
+************************
+
+.. note:: 區間極值裸題
+
+裸題，用線段樹維護區間的最大值與最小值。
+
+因為沒有更新，用 Sparse Table 也可以。
+
+直接看 code 吧。
+
+************************
+AC Code 1
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <vector>
+    #include <queue>
+    #include <algorithm>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    typedef pair<int, int> pii;
+    #define st first
+    #define nd second
+
+    const int INF = 0x3f3f3f3f;
+    const int MAX_N = 50000;
+    const int MAX_NN = (1 << 16); // should be bigger than MAX_N
+
+    int N, Q;
+    int inp[MAX_N];
+
+    int NN;
+    pii seg[2 * MAX_NN - 1]; // <max, min>
+
+    void seg_gather(int u) {
+        seg[u].st = max(seg[u * 2 + 1].st, seg[u * 2 + 2].st);
+        seg[u].nd = min(seg[u * 2 + 1].nd, seg[u * 2 + 2].nd);
+    }
+
+    void seg_init() {
+        NN = 1;
+        while (NN < N)
+            NN *= 2;
+
+        for (int i = 0; i < N; i++) {
+            seg[NN - 1 + i].st = inp[i];
+            seg[NN - 1 + i].nd = inp[i];
+        }
+        for (int i = N; i < NN; i++) {
+            seg[NN - 1 + i].st = -INF;
+            seg[NN - 1 + i].nd = INF;
+        }
+    }
+
+    void seg_build(int u) {
+        if (u >= NN - 1) { // leaf
+            return;
+        }
+
+        seg_build(u * 2 + 1);
+        seg_build(u * 2 + 2);
+        seg_gather(u);
+    }
+
+    pii seg_query(int a, int b, int u, int l, int r) {
+        if (l >= b || r <= a) {
+            return pii(-INF, INF);
+        }
+
+        if (a <= l && r <= b) {
+            return seg[u];
+        }
+
+        int m = (l + r) / 2;
+        pii res1 = seg_query(a, b, u * 2 + 1, l, m);
+        pii res2 = seg_query(a, b, u * 2 + 2, m, r);
+
+        return pii(max(res1.st, res2.st), min(res1.nd, res2.nd));
+    }
+
+    int main() {
+        scanf("%d %d", &N, &Q);
+        for (int i = 0; i < N; i++) {
+            scanf("%d", &inp[i]);
+        }
+
+        seg_init();
+        seg_build(0);
+        while (Q--) {
+            int a, b; scanf("%d %d", &a, &b); a--; b--;
+            pii res = seg_query(a, b + 1, 0, 0, NN);
+            printf("%d\n", res.st - res.nd);
+        }
+
+        return 0;
+    }
+
+************************
+AC Code 2
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <vector>
+    #include <queue>
+    #include <algorithm>
+    #include <cmath>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    typedef pair<int, int> pii;
+    #define st first
+    #define nd second
+
+    const int MAX_N = 50000;
+    const int MAX_LOG_N = 16; // ceil(lg(MAX_N))
+
+    int N, Q;
+    int inp[MAX_N];
+
+    pii sptb[MAX_LOG_N][MAX_N]; // sptb[i][j] = the max/min value of [j, j + 2^i)
+
+    void sptb_init() {
+        for (int j = 0; j < N; j++)
+            sptb[0][j].st = sptb[0][j].nd = inp[j];
+
+        for (int i = 1; (1 << i) <= N; i++) {
+            for (int j = 0; j + (1 << i) <= N; j++) {
+                sptb[i][j].st =
+                    max(sptb[i - 1][j].st, sptb[i - 1][j + (1 << (i - 1))].st);
+                sptb[i][j].nd =
+                    min(sptb[i - 1][j].nd, sptb[i - 1][j + (1 << (i - 1))].nd);
+            }
+        }
+    }
+
+    // [l, r)
+    pii sptb_query(int l, int r) {
+        // int k = 0;
+        // while (1 << (1 + k) <= r - l)
+        //     k++;
+        int k = floor(log2(double(r - l)));
+
+        pii res1 = sptb[k][l];
+        pii res2 = sptb[k][r - (1 << k)];
+        return pii(max(res1.st, res2.st), min(res1.nd, res2.nd));
+    }
+
+    int main() {
+        scanf("%d %d", &N, &Q);
+        for (int i = 0; i < N; i++) {
+            scanf("%d", &inp[i]);
+        }
+
+        sptb_init();
+
+        while (Q--) {
+            int a, b; scanf("%d %d", &a, &b); a--; b--;
+            pii res = sptb_query(a, b + 1);
+            printf("%d\n", res.st - res.nd);
+        }
+
+        return 0;
+    }

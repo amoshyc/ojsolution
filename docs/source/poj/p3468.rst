@@ -1,26 +1,61 @@
-###################################################
-Segment Tree
-###################################################
+###########################################
+[POJ] 3468. A Simple Problem with Integers
+###########################################
 
 .. sidebar:: Tags
 
-    - ``tag_segment_tree``
-    - ``tag_template``
+    - ``tag_binary_search``
+    - ``tag_greedy``
 
 .. contents:: TOC
     :depth: 2
 
+
+******************************************************
+`題目 <http://poj.org/problem?id=3468>`_
+******************************************************
+
+給定 N 個整數，Q 筆操作，每筆操作為::
+
+    1. C a b c: 將 [a, b] 每個數都加 c
+    2. Q a b: 輸出 [a, b] 的區間和
+
 ************************
-程式碼
+Specification
+************************
+
+::
+
+    1 <= N, Q <= 10^5
+    -10^5 <= c <= 10^5
+    -10^9 <= A[i] <= 10^9
+
+************************
+分析
+************************
+
+.. note:: 裸線段樹 + 延遲標記
+
+有區間更新，要用延遲標記，裸題。
+
+************************
+AC Code
 ************************
 
 .. code-block:: cpp
     :linenos:
 
+    #include <iostream>
+    #include <cstdio>
+    #include <cstring>
+    using namespace std;
+
+    typedef long long ll;
+
     const int MAX_N = 100000;
     const int MAX_NN = (1 << 20); // should be bigger than MAX_N
 
-    int N;
+    int N, M;
     ll inp[MAX_N];
 
     int NN;
@@ -99,9 +134,29 @@ Segment Tree
         return ans;
     }
 
-************************
-模板驗證
-************************
+    int main() {
+        scanf("%d %d", &N, &M);
+        for (int i = 0; i < N; i++)
+            scanf("%lld", &inp[i]);
 
- - [不用更新] `poj3264 <http://codepad.org/rQdI5Xv6>`_
- - [延遲標記] `poj3468 <http://codepad.org/ITp1iOPE>`_
+        seg_init();
+        seg_build(0);
+
+        while (M--) {
+            char c[10]; scanf("%s", c);
+            if (c[0] == 'C') {
+                int a, b, c;
+                scanf("%d %d %d", &a, &b, &c);
+                a--; b--;
+                seg_update(a, b + 1, c, 0, 0, NN);
+            }
+            else {
+                int a, b;
+                scanf("%d %d", &a, &b);
+                a--; b--;
+                printf("%lld\n", seg_query(a, b + 1, 0, 0, NN));
+            }
+        }
+
+        return 0;
+    }
