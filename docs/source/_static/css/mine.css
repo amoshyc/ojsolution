@@ -32,6 +32,7 @@ html body div[class^='highlight'] pre {
 }
 
 p {
+    white-space: pre-wrap;
     font-size: 15px;
     font-family: "Oxygen Mono","Droid Sans Mono","Liberation Mono",Consolas,"Lucida Console","DejaVu Sans Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
 }
