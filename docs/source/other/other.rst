@@ -12,3 +12,4 @@ Other
 
     toj12.rst
     tioj1208.rst
+    交大暑訓 2016 enum <nctu_sc_enum/index.rst>
