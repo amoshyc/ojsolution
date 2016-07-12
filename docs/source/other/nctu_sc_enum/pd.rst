@@ -5,6 +5,7 @@
 .. sidebar:: Tags
 
     - ``tag_enum``
+    - ``tag_easy``
 
 .. contents:: TOC
     :depth: 2

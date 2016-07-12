@@ -7,7 +7,6 @@
     - ``tag_enum``
     - ``tag_greedy``
     - ``tag_constructive_algorithm``
-    - ``tag_binary_search``
 
 .. contents:: TOC
     :depth: 2

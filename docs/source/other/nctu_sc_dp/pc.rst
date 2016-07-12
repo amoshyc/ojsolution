@@ -32,7 +32,7 @@ Specification
 
 .. note:: 兩次 dp
 
-這個 dp 沒那麼好想啊，不過還是被我想出來了，哈~
+這個 dp 沒那麼好想啊，不過還是被我想出來了，哈 XD
 
 首先，R[i] 代表右端點為 i 的區間和。存在轉移方程式::
 
@@ -41,11 +41,11 @@ Specification
 接下來，我只要知道「每個區間的左邊，不與之相交的區間中，誰的和最大」（dp[i]），
 區間 i 與之結合，即可產生最大的總和。
 
-※ 區間 i 與其右的區間 j 結合的情況與在枚舉 j 時考慮到。
+※ 區間 i 有可能與其右的區間 j 結合的情況會與在枚舉 j 時考慮到。
 
 dp[i] 正式定義為::
 
-    x such that R[x] is max among R[0, i - K]
+    dp[i] = x such that R[x] is maximum among R[0, i - K]
 
 dp[i] 存在轉移方程式。
 
