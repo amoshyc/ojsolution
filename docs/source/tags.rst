@@ -13,7 +13,7 @@ Technique
 - tag_brute-force
 - tag_enum
 - tag_merge_sort
-- tag_sorting
+- tag_sortingo
 - tag_prefix
 - tag_suffix
 - tag_two_pointers
@@ -25,6 +25,8 @@ Technique
 - tag_extgcd
 - tag_half_enum
 - tag_bitmask
+- tag_combination
+- mod_inverse
 
 ************************
 Data Structure

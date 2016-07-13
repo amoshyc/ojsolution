@@ -8,3 +8,4 @@ Number
     fast_pow.rst
     build_primes.rst
     extgcd.rst
+    combinations.rst
