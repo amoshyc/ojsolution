@@ -14,3 +14,4 @@ Other
     tioj1208.rst
     nctu_sc_enum/index.rst
     nctu_sc_dp/index.rst
+    nctu_sc_greedy/index.rst

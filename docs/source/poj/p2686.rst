@@ -1,0 +1,145 @@
+#####################################
+[POJ] 2686. Traveling by Stagecoach
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_bitmask``
+    - ``tag_dp``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=2686>`_
+******************************************************
+
+給定一個無向帶權圖，代表 M 個城市之間的路，與 N 張車票，
+每張車票有一個數值 t[i]，若欲使用車票 t[i] 從城市 u 經由路徑 d[u][v] 走到城市 v，
+所花的時間為 d[u][v] / t[i]。請問，從城市 A 走到城市 B 最快要多久？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 8
+    1 <= M <= 30
+    1 <= t[i] <= 10
+    1 <= d[u][v] <= 100
+
+************************
+分析
+************************
+
+.. note:: 位元 dp
+
+書上例題，有點不好想，這裡給出一個跟書上不同的解法。
+
+::
+
+    dp[S][v] = 從城市 A 到城市 v 的最少時間，其中 S 為用過的車票的集合
+
+考慮前一個城市 u 是誰，使用哪個車票 t[i] 而來，可以得到轉移方程式::
+
+    dp[S][v] = min([
+        dp[S - {v}][u] + d[u][v] / t[i]
+        for all city u has edge to v, for all ticket in S
+    ])
+
+實作偏難…
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <algorithm>
+    #include <cmath>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    const int INF = 0x3f3f3f3f;
+    const int MAX_N = 8;
+    const int MAX_M = 30;
+
+    int N, M, P, A, B;
+
+    int t[MAX_N];
+    int w[MAX_M][MAX_M];
+    double dp[(1 << MAX_N)][MAX_M];
+    // dp[S][v]: min time need from A to v
+    //  S = set of used ticket
+    //  v = current city
+
+    int main() {
+        while (scanf("%d %d %d %d %d", &N, &M, &P, &A, &B)) {
+            if (N == 0 && M == 0 && P == 0 && A == 0 && B == 0) break;
+
+            A--; B--;
+
+            // init
+            memset(w, INF, sizeof(w));
+            for (int v = 0; v < M; v++) {
+                w[v][v] = 0;
+            }
+            for (int s = 0; s < (1 << N); s++) {
+                for (int v = 0; v < M; v++) {
+                    dp[s][v] = INF;
+                }
+            }
+
+            // input
+            for (int i = 0; i < N; i++) {
+                scanf("%d", &t[i]);
+            }
+
+            for (int u = 0; u < M; u++) {
+                fill(w[u], w[u] + M, INF);
+                w[u][u] = 0;
+            }
+
+            for (int i = 0; i < P; i++) {
+                int u, v, d;
+                scanf("%d %d %d", &u, &v, &d);
+                u--; v--;
+                w[u][v] = w[v][u] = d;
+            }
+
+            dp[0][A] = 0;
+
+            for (int S = 1; S < (1 << N); S++) {
+                for (int v = 0; v < M; v++) {
+                    for (int u = 0; u < M; u++) { // from u
+                        if (w[u][v] == INF) continue; // no edge between u -> v
+
+                        for (int x = 0; x < N; x++) { // use ticket x
+                            if (!(S & (1 << x))) continue; // ticket x not in S
+
+                            dp[S][v] = min(dp[S][v],
+                                dp[S ^ (1 << x)][u] + double(w[u][v]) / t[x]
+                            );
+                        }
+                    }
+                }
+            }
+
+            double ans = INF;
+            for (int S = 0; S < (1 << N); S++) {
+                ans = min(ans, dp[S][B]);
+            }
+
+            if (fabs(ans - INF) < 1e-8) puts("Impossible");
+            else {
+                printf("%.10f\n", ans);
+            }
+
+        }
+        return 0;
+    }

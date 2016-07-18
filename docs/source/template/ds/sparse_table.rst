@@ -22,7 +22,7 @@ Sparse Table
 
     void sptb_init() {
         for (int i = 0; i < N; i++) {
-            sptb[0][i] = len[i];
+            sptb[0][i] = A[i];
         }
 
         for (int i = 1; (1 << i) <= N; i++) {

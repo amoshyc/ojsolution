@@ -6,6 +6,8 @@ POJ (PKU Online Judge)
     :maxdepth: 1
 
     p1990.rst
+    p2441.rst
+    p2686.rst
     p3045.rst
     p3233.rst
     p3258.rst

@@ -1,0 +1,207 @@
+#####################################
+[POJ] 2441. Arrange the Bulls
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_bitmask``
+    - ``tag_dp``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=2441>`_
+******************************************************
+
+N 隻公牛都喜歡打籃球，但都不跟別人打，因為牠們認為其它牛都很弱（似乎在暗諷公牛隊啊！…）
+
+總之，現在有 N 隻公牛，M 個牛棚，每隻公牛 i 都只在一些特定的牛棚 P[i] 中打籃球，
+而每個牛棚也只能有一隻牛使用，請問總共有多少種組合方式？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N, M <= 20
+    1 <= |P[i]| <= N
+
+************************
+分析
+************************
+
+.. note:: 位元 dp
+
+位元 dp 的經典題，注意題目並沒有保證 M 大於或小於 N，所以牛棚可能剩下或不夠。
+
+::
+
+    dp[i][S] = 前 i + 1 隻牛，用過的牛棚的集合為 S 的方法數
+
+想找出 dp[i][S] 的轉移方程式，我們考慮第 i 隻牛是用了哪個牛棚，
+當然的，i 一定要在 P[i] 中，且 i 也在 S 中。
+枚舉牛棚 x，可以得::
+
+    dp[i][S] = sum([
+        dp[i - 1][S - {x}] for x in P[i] if x in S
+    ])
+
+然後這題得壓個維度才不會 MLE，壓維度時記得把迴圈方向反向。
+計算解時，要注意是算那些「使用的牛棚數」為 N 的那些集合，而不是牛棚的所有子集合。
+以下給出 MLE 與 AC Code。
+
+************************
+MLE Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <numeric>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    const int MAX_N = 20;
+    const int MAX_M = 20;
+    int N, M;
+    vector<int> P[MAX_N];
+    int dp[MAX_N][1 << MAX_M];
+
+    // dp[i][S] = 前 i + 1 隻牛，用過的牛棚的集合為 S，的方法數
+    // dp[i][S] = sum([
+    //     dp[i - 1][S - {x}] for x in P[i] if x in S
+    // ])
+
+    int sum_digit(int n) {
+        int cnt = 0;
+        while (n) {
+            if (n & 1) cnt++;
+            n >>= 1;
+        }
+        return cnt;
+    }
+
+    int main() {
+        scanf("%d %d", &N, &M);
+        for (int i = 0; i < N; i++) {
+            int p; scanf("%d", &p);
+            for (int j = 0; j < p; j++) {
+                int inp; scanf("%d", &inp); inp--;
+                P[i].push_back(inp);
+            }
+        }
+
+        for (size_t i = 0; i < P[0].size(); i++) {;
+            dp[0][(1 << P[0][i])] = 1;
+        }
+
+        for (int i = 1; i < N; i++) {
+            for (int S = 1; S < (1 << M); S++) {
+                if (sum_digit(S) < i + 1) continue;
+
+                dp[i][S] = 0;
+                for (size_t j = 0; j < P[i].size(); j++) {
+                    int x = P[i][j];
+
+                    if (S & (1 << x)) {
+                        dp[i][S] += dp[i - 1][S ^ (1 << x)];
+                    }
+                }
+            }
+        }
+
+        // for (int i = 0; i < N; i++) {
+        //     for (int S = 1; S < (1 << M); S++) {
+        //         printf("dp[%d][%d] = %d\n", i, S, dp[i][S]);
+        //     }
+        // }
+
+        int ans = accumulate(dp[N - 1], dp[N - 1] + (1 << M), 0);
+        printf("%d\n", ans);
+
+        return 0;
+    }
+
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <numeric>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    const int MAX_N = 20;
+    const int MAX_M = 20;
+    int N, M;
+    vector<int> P[MAX_N];
+    int dp[1 << MAX_M];
+
+    // dp[i][S] = 前 i + 1 隻牛，用過的牛棚的集合為 S，的方法數
+    // dp[i][S] = sum([
+    //     dp[i - 1][S - {x}] for x in P[i] if x in S
+    // ])
+
+    int sum_digit(int n) {
+        int cnt = 0;
+        while (n) {
+            if (n & 1) cnt++;
+            n >>= 1;
+        }
+        return cnt;
+    }
+
+    int main() {
+        scanf("%d %d", &N, &M);
+        for (int i = 0; i < N; i++) {
+            int p; scanf("%d", &p);
+            for (int j = 0; j < p; j++) {
+                int inp; scanf("%d", &inp); inp--;
+                P[i].push_back(inp);
+            }
+        }
+
+        for (size_t i = 0; i < P[0].size(); i++) {;
+            dp[(1 << P[0][i])] = 1;
+        }
+
+        for (int i = 1; i < N; i++) {
+            for (int S = (1 << M) - 1; S >= 1; S--) {
+                if (sum_digit(S) < i + 1) continue;
+
+                for (size_t j = 0; j < P[i].size(); j++) {
+                    int x = P[i][j];
+
+                    if (S & (1 << x)) {
+                        dp[S] += dp[S ^ (1 << x)];
+                    }
+                }
+            }
+        }
+
+        int ans = 0;
+        for (int i = 1; i < (1 << M); i++) {
+            if (sum_digit(i) == N) {
+                ans += dp[i];
+            }
+        }
+
+        printf("%d\n", ans);
+
+        return 0;
+    }
