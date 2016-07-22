@@ -17,13 +17,13 @@
 .. code-block:: cpp
     :linenos:
 
-    ll MAX_NUM;
-    bool is_prime[N];
+    const ll MAX_NUM = 1e6;
+    bool is_prime[MAX_NUM];
     vector<ll> primes;
 
     void init_primes() {
         fill(is_prime, is_prime + MAX_NUM, true);
-        // build primes under N
+        is_prime[0] = is_prime[1] = false;
         for (ll i = 2; i < MAX_NUM; i++) {
             if (is_prime[i]) {
                 primes.push_back(i);
@@ -36,5 +36,3 @@
 ************************
 模板驗證
 ************************
-
-`poj2739 <http://codepad.org/Msof6Rk3>`_

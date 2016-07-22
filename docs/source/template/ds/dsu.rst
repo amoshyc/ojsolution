@@ -17,32 +17,38 @@ Disjoint Set 並查集
 .. code-block:: cpp
     :linenos:
 
-    int par[MAX_N];
+    struct Dsu {
+        int par[1000 * 1000];
 
-    void init() {
-        memset(par, -1, sizeof(par)); // par[i] = -rank[i] if i is root
-    }
+        void init() {
+            memset(par, -1, sizeof(par)); // par[i] = -rank[i] if i is root
+        }
 
-    int root(int a) {
-        if (par[a] < 0) return a;
-        return (par[a] = root(par[a]));
-    }
+        int root(int a) {
+            if (par[a] < 0) return a;
+            return (par[a] = root(par[a]));
+        }
 
-    void unite(int a, int b) {
-        a = root(a);
-        b = root(b);
-        if (a == b) return; // already in same set
-        if (-par[a] > -par[b]) swap(a, b); // if (rank[a] > rank[b])
-        par[b] += par[a]; // height[b] += height[a]
-        par[a] = b;
-    }
+        void unite(int a, int b) {
+            a = root(a);
+            b = root(b);
+            if (a == b) return; // already in same set
+            if (-par[a] > -par[b]) swap(a, b); // if (rank[a] > rank[b])
+            par[b] += par[a]; // size[b] += size[a]
+            par[a] = b;
+        }
 
-    bool same(int a, int b) {
-        return root(a) == root(b);
-    }
+        bool same(int a, int b) {
+            return root(a) == root(b);
+        }
+
+        int size(int a) {
+            return -par[a];
+        }
+    };
 
 ************************
 模板驗證
 ************************
 
-`poj1182 <http://codepad.org/cgXatNnD>`_
+待測
