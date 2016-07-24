@@ -5,7 +5,6 @@
 .. sidebar:: Tags
 
     - ``tag_fast_pow``
-    - ``tag_matrix``
     - ``tag_template``
 
 .. contents:: TOC
@@ -18,12 +17,16 @@
 .. code-block:: cpp
     :linenos:
 
+    const ll MOD = 1e9 + 7;
+
+    // a^b
     ll fast_pow(ll a, ll b) {
+        // b %= (MOD - 1) // if MOD is prime, Fermat's little theorem
         ll ans = 1;
-        ll base = a;
+        ll base = a % MOD;
         while (b) {
-            if (b & 1) ans *= base;
-            base = base * base;
+            if (b & 1) ans = ans * base % MOD;
+            base = base * base % MOD;
             b >>= 1;
         }
         return ans;

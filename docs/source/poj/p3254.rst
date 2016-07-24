@@ -1,0 +1,155 @@
+#####################################
+[POJ] 3254. Corn Fields
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_bitmask``
+    - ``tag_dp``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=3254>`_
+******************************************************
+
+給定 NxM 個田地，其中有一些是不能種東西的。
+Farmer John 想種植玉米，但任兩個種植玉米的田地不能相鄰。
+請問有幾種符合條件的種法。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N, M <= 12
+
+************************
+分析
+************************
+
+.. note:: 位元 dp
+
+::
+
+    dp[r][S] = 上方 r + 1 行，第 r 行選的田地的集合為 S，的方法數
+    考慮上一行選的田地集合 P
+    dp[r][S] = sum([
+        dp[r - 1][P]
+        for all P is not adjacent to S and P is valid
+    ])
+
+base::
+
+    dp[0][S] = 1 if S is valid else 0
+
+ans::
+
+    sum(dp[N - 1][S] for all valid S)
+
+valid 是指沒有種到不能種的田地，且該行沒有橫向相鄰的田地都被種到。
+adjacent 是指該行沒有跟上一行的田地，有縱向相鄰 的田地都被種到。
+
+兩者都可以透過位元的方式，O(1) 判斷。
+細節看 code 吧，應該很清楚。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <algorithm>
+    #include <numeric>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    typedef long long ll;
+    const int MAX_N = 12;
+    const int MAX_M = 12;
+    const ll MOD = 100000000;
+
+    int N, M;
+    int inf[MAX_N]; // infertile squares mask
+    ll dp[MAX_N][1 << MAX_M];
+
+    // dp[r][S] = 上方 r + 1 行，第 r 行選的田地的集合為 S，的方法數
+    // 考慮上一行選的田地集合 P
+    // dp[r][S] = sum([
+    //     dp[r - 1][P]
+    //     for all P is not adjacent to S and P is valid
+    // ])
+
+    // base: dp[0][S] = 1 if S is valid else 0
+    // ans: sum(dp[N - 1][S] for all valid S)
+
+    inline bool is_valid(int r, int S) {
+        if (S & (S << 1)) // adj in current row
+            return false;
+        if (S & inf[r]) // use infertile squares
+            return false;
+        return true;
+    }
+
+    inline bool is_adj(int P, int S) {
+        return (P & S) != 0; // vertically adjacent
+    }
+
+    ll solve() {
+        // base
+        for (int S = 0; S < (1 << M); S++) {
+            if (is_valid(0, S)) {
+                dp[0][S] = 1;
+            }
+        }
+
+        // dp
+        for (int r = 1; r < N; r++) {
+            for (int S = 0; S < (1 << M); S++) {
+                dp[r][S] = 0;
+
+                if (!is_valid(r, S)) {
+                    continue;
+                }
+
+                for (int P = 0; P < (1 << M); P++) {
+                    if (is_valid(r - 1, P) && !is_adj(P, S)) {
+                        dp[r][S] = (dp[r][S] + dp[r - 1][P]) % MOD;
+                    }
+                }
+            }
+        }
+
+        ll ans = 0;
+        for (int i = 0; i < (1 << M); i++) {
+            ans += dp[N - 1][i];
+            ans %= MOD;
+        }
+        return ans;
+    }
+
+    int main() {
+        while (scanf("%d %d", &N, &M) != EOF) {
+            memset(inf, 0, sizeof(inf));
+            memset(dp, 0, sizeof(dp));
+
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < M; j++) {
+                    int inp; scanf("%d", &inp);
+                    if (inp == 0) {
+                        inf[i] = (inf[i] | (1 << j));
+                    }
+                }
+            }
+
+            printf("%lld\n", solve());
+        }
+
+        return 0;
+    }

@@ -1,11 +1,12 @@
 ########################
-Number
+Math
 ########################
 
 .. toctree::
     :maxdepth: 1
 
     fast_pow.rst
+    fast_pow_matrix.rst
     build_primes.rst
     extgcd.rst
     combinations.rst

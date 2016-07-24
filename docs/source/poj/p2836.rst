@@ -1,0 +1,167 @@
+#####################################
+[POJ] 2836. Corn Fields
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_bitmask``
+    - ``tag_dp``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=2836>`_
+******************************************************
+
+給定 NxM 個田地，其中有一些是不能種東西的。
+Farmer John 想種植玉米，但任兩個種植玉米的田地不能相鄰。
+請問有幾種符合條件的種法。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N, M <= 12
+
+************************
+分析
+************************
+
+.. note:: 位元 dp
+
+::
+
+    dp[S] = cover 的點的集合為 S，最小面積
+    dp[S] = min([
+         dp[S - {i, j}] + Rect(P[i], P[j])
+          for i in S
+          for j in S
+    ])
+    Base: dp[0] = 0
+    ans: dp[all points]
+
+    Rect(P[i], P[j]) 共線時，長度／寬度設為 1
+
+上述方法會**錯**，因為移除的那個 Rect 可能蓋到其它點
+
+改成::
+
+    dp[S] = min([
+         dp[S - { points in retangle }] + r
+         for all rectangle r covered by S
+    ])
+
+仍然是錯的，只知道現在的集合，與 mask，我們無法還原前一個集合是什麼
+所以只能遞推…
+
+e.g.::
+
+    (0b1010) | (0b0011) = (0b1011)
+    (0b1000) | (0b0011) = (0b1011)
+
+只知道結果 0b1011 與 mask 0b0011，無法還原前一個集合。
+
+最終寫法::
+
+    dp[S] = cover 的點的集合為 S，最小面積
+    dp[S ∪ r.points] =
+        min(dp[S ∪ r.points], dp[S] + r.area))
+        for all rectangle r if S ∪ r.points is not S (i.e. already covered)
+
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cmath>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    #include <vector>
+    #include <algorithm>
+    using namespace std;
+
+    struct Rect {
+        int x, y;
+        int w, h;
+        int mask;
+
+        bool contain(int qx, int qy) {
+            if (qx < x || qx > x + w) return false;
+            if (qy < y || qy > y + h) return false;
+            return true;
+        }
+
+        int area() const {
+            return w * h;
+        }
+    };
+
+    const int MAX_N = 15;
+    const int INF = 0x3f3f3f3f;
+    int N;
+    int dp[1 << MAX_N];
+    int x[MAX_N], y[MAX_N];
+    vector<Rect> rect;
+
+    Rect get_rect(int i, int j) {
+        Rect r;
+        r.x = min(x[i], x[j]);
+        r.y = min(y[i], y[j]);
+        r.w = max(1, max(x[i], x[j]) - r.x); // area cannot be 0
+        r.h = max(1, max(y[i], y[j]) - r.y); // area cannot be 0
+
+        r.mask = 0;
+        for (int k = 0; k < N; k++) {
+            if (r.contain(x[k], y[k])) {
+                r.mask |= (1 << k);
+            }
+        }
+
+        return r;
+    }
+
+    int main() {
+        while (scanf("%d", &N)) {
+            if (N == 0) break;
+
+            memset(dp, INF, sizeof(dp));
+            rect.clear();
+
+            // input
+            for (int i = 0; i < N; i++) {
+                scanf("%d %d", &x[i], &y[i]);
+            }
+
+            // build rect
+            for (int i = 0; i < N; i++) {
+                for (int j = i + 1; j < N; j++) {
+                    rect.push_back(get_rect(i, j));
+                }
+            }
+
+            // dp
+            dp[0] = 0;
+            for (int S = 0; S < (1 << N); S++) {
+                if (dp[S] != INF) {
+                    for (size_t i = 0; i < rect.size(); i++) {
+                        const Rect& r = rect[i];
+                        if ((S | r.mask) != S)
+                        dp[S | r.mask] = min(dp[S | r.mask], dp[S] + r.area());
+                    }
+                }
+            }
+
+
+            // ans
+            printf("%d\n", dp[(1 << N) - 1]);
+        }
+
+        return 0;
+    }

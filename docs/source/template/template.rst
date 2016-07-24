@@ -9,7 +9,7 @@ Template
     Graph <graph/index.rst>
     Tree <tree/index.rst>
     DP <dp/index.rst>
-    Number <number/index.rst>
+    Math <math/index.rst>
     String <string/index.rst>
     Search <search/index.rst>
     Geometry <geometry/index.rst>
