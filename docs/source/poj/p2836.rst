@@ -1,5 +1,5 @@
 #####################################
-[POJ] 2836. Corn Fields
+[POJ] 2836. Rectangular Covering
 #####################################
 
 .. sidebar:: Tags

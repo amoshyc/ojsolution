@@ -100,6 +100,97 @@ Segment Tree
     }
 
 ************************
+程式碼（單點更新）
+************************
+
+.. code-block:: cpp
+
+    #include <iostream>
+    #include <vector>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    template<class T>
+    struct SegTree {
+        int NN;
+        vector<T> seg;
+        T def; // default vale
+
+        T func(T a, T b) {
+            return min(a, b);
+        }
+
+        void gather(int u) {
+            seg[u] = func(seg[u * 2 + 1], seg[u * 2 + 2]);
+        }
+
+        void init(int N, T d, T* inp) {
+            def = d;
+            NN = 1;
+            while (NN < N)
+                NN *= 2;
+
+            seg = vector<T>(2 * NN - 1, def);
+            for (int i = 0; i < N; i++) {
+                seg[NN - 1 + i] = inp[i];
+            }
+
+            build(0);
+        }
+
+        void build(int u) {
+            if (u >= NN - 1) { // leaf
+                return;
+            }
+            build(u * 2 + 1);
+            build(u * 2 + 2);
+            gather(u);
+        }
+
+        void _update(int idx, T val, int u, int l, int r) {
+            if (l > idx || r <= idx) {
+                return;
+            }
+
+            if (l == idx && idx + 1 == r) {
+                seg[u] = val;
+                return;
+            }
+
+            int m = (l + r) / 2;
+            _update(idx, val, u * 2 + 1, l, m);
+            _update(idx, val, u * 2 + 2, m, r);
+            gather(u);
+        }
+
+        T _query(int a, int b, int u, int l, int r) {
+            if (l >= b || r <= a) {
+                return def;
+            }
+
+            if (a <= l && r <= b) {
+                return seg[u];
+            }
+
+            int m = (l + r) / 2;
+            T res1 = _query(a, b, u * 2 + 1, l, m);
+            T res2 = _query(a, b, u * 2 + 2, m, r);
+
+            return func(res1, res2);
+        }
+
+        void update(int idx, T val) {
+            _update(idx, val, 0, 0, NN);
+        }
+
+        T query(int a, int b) {
+            return _query(a, b, 0, 0, NN);
+        }
+    };
+
+************************
 模板驗證
 ************************
 

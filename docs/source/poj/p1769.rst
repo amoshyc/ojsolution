@@ -1,0 +1,203 @@
+#####################################
+[POJ] 1769. Minimizing maximizer
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_segment_tree``
+    - ``tag_dp``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=1769>`_
+******************************************************
+
+N 個數字被丟入依序排列的 M 個 sorter，第 i 個 sorter 只會排序區間 [s[i], t[i]]。
+請問在最差情況下，最少要用幾個 sorter 產生的結果才會保證是給定數字的最大值。（保證有解）
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 50000
+    1 <= M <= 500000
+
+************************
+分析
+************************
+
+.. note:: dp, 利用線段樹來壓時間複雜度
+
+最差情況發生在「最大值」位於給定的數字的第 1 項，
+這時，解的所有 sorter 的區間聯集起來，必需是 [1, N]。
+
+可以輕易的寫出 dp::
+
+    dp[i][j] = 前 i + 1 個 sorter 中，使最大值轉移至第 j 項所需的最少 sorter 數
+
+考慮第 i 個 sorter 只排序 [s[i], t[i]] 區間，可得::
+
+    dp[i][j] =
+        1. min([dp[i - 1][k] for s[i] <= k <= t[i]]) if j = t[i],
+        2. dp[i][j - 1] if j ≠ t[i]
+
+明顯地空間與時間複雜度都不可行，嘗試 **空間** 壓掉第一個維度 i，可得::
+
+    for i in [0, N):
+        for j in [1, M]:
+            if j == t[i]:
+                dp[j] = min([dp[k] for s[i] <= k <= t[i]])
+            else:
+                dp[j] = dp[j]
+
+**時間** 壓掉維度 j::
+
+    fill(dp, INF)
+    for i in [0, N):
+        dp[t[i]] = min([dp[k] for s[i] <= k <= t[i]])
+
+可以發現對於每個 i，我們都在查詢 [s[i], t[i]] 的最小值，這可以用線段樹來加速::
+
+    fill(dp, INF)
+    for i in [0, N):
+        dp[t[i]] = min(dp[t[i]], query_min_of_dp(s[i], t[i]))
+
+當然，求得該值並寫進 dp[t[i]] 後，也要記得更新線段樹。
+之後就好寫了，整個程式碼除線段樹的模板外，也沒幾行~
+
+Base case::
+
+    dp[1] = 1
+
+ans::
+
+    dp[N]
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <vector>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    template<class T>
+    struct SegTree {
+        int NN;
+        vector<T> seg;
+        T def; // default vale
+
+        T func(T a, T b) {
+            return min(a, b);
+        }
+
+        void gather(int u) {
+            seg[u] = func(seg[u * 2 + 1], seg[u * 2 + 2]);
+        }
+
+        // void init(int N, T d, T* inp) {
+        void init(int N, T d) {
+            def = d;
+            NN = 1;
+            while (NN < N)
+                NN *= 2;
+
+            seg = vector<T>(2 * NN - 1, def);
+            // for (int i = 0; i < N; i++) {
+            //     seg[NN - 1 + i] = inp[i];
+            // }
+
+            build(0);
+        }
+
+        void build(int u) {
+            if (u >= NN - 1) { // leaf
+                return;
+            }
+            build(u * 2 + 1);
+            build(u * 2 + 2);
+            gather(u);
+        }
+
+        void _update(int idx, T val, int u, int l, int r) {
+            if (l > idx || r <= idx) {
+                return;
+            }
+
+            if (l == idx && idx + 1 == r) {
+                seg[u] = val;
+                return;
+            }
+
+            int m = (l + r) / 2;
+            _update(idx, val, u * 2 + 1, l, m);
+            _update(idx, val, u * 2 + 2, m, r);
+            gather(u);
+        }
+
+        T _query(int a, int b, int u, int l, int r) {
+            if (l >= b || r <= a) {
+                return def;
+            }
+
+            if (a <= l && r <= b) {
+                return seg[u];
+            }
+
+            int m = (l + r) / 2;
+            T res1 = _query(a, b, u * 2 + 1, l, m);
+            T res2 = _query(a, b, u * 2 + 2, m, r);
+
+            return func(res1, res2);
+        }
+
+        void update(int idx, T val) {
+            _update(idx, val, 0, 0, NN);
+        }
+
+        T query(int a, int b) {
+            return _query(a, b, 0, 0, NN);
+        }
+    };
+
+    const int INF = 0x3f3f3f3f;
+    const int MAX_N = 50000;
+    const int MAX_M = 500000;
+    int N, M;
+    int s[MAX_M];
+    int t[MAX_M];
+    int dp[MAX_N + 1];
+
+    SegTree<int> seg;
+
+    int main() {
+        scanf("%d %d", &N, &M);
+        for (int i = 0; i < M; i++) {
+            scanf("%d %d", &s[i], &t[i]);
+        }
+
+        seg.init(N, INF);
+        memset(dp, INF, sizeof(dp));
+
+        dp[1] = 0;
+        seg.update(1, 0);
+        for (int i = 0; i < M; i++) {
+            int v = min(dp[t[i]], seg.query(s[i], t[i] + 1) + 1);
+            dp[t[i]] = v;
+            seg.update(t[i], v);
+        }
+
+        printf("%d\n", dp[N]);
+
+        return 0;
+    }

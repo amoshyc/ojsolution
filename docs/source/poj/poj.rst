@@ -5,6 +5,7 @@ POJ (PKU Online Judge)
 .. toctree::
     :maxdepth: 1
 
+    p1769.rst
     p1990.rst
     p2441.rst
     p2686.rst
