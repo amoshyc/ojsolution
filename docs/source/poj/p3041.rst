@@ -1,0 +1,116 @@
+#####################################
+[POJ] 3041. Asteroids
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_max_flow``
+    - ``tag_min_vertex_cover``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=3041>`_
+******************************************************
+
+給定 NxN 的格子，其中一些格子有小行星，
+你現在有一種武器，每發射一次可以摧毀某個 row 或某個 col 上的所有小行星。
+請問最少要發射幾次才能摧毀所有的小行星？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 500
+
+************************
+分析
+************************
+
+.. note:: 最小點涵蓋
+
+每個 row 編號成 [0, r)，
+每個 col 編號成 [r, r + c)，
+都視為一個 vertex
+如果格子 (r, c) 上有小行星，則在節點 r，節點 r + c 間連上一條邊。
+
+這題所求即為這個圖的最小點涵蓋。
+即每個邊都至少有一個點在所選的點集合裡，且這個集合是最小的。
+
+在一般圖上最小點涵蓋是 NP-Hard，但在二分圖上可以用二分圖匹配解。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <vector>
+    #include <queue>
+    #include <map>
+    #include <algorithm>
+    #include <functional>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    const int MAX_V = 2 * 500;
+    int V;
+    vector<int> g[MAX_V];
+    int match[MAX_V];
+    bool used[MAX_V];
+
+    void add_edge(int u, int v) {
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+
+    bool dfs(int v) {
+        used[v] = true;
+        for (size_t i = 0; i < g[v].size(); i++) {
+            int u = g[v][i], w = match[u];
+            if (w < 0 || (!used[w] && dfs(w))) {
+                match[v] = u;
+                match[u] = v;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    int bipartite_matching() {
+        int res = 0;
+        memset(match, -1, sizeof(match));
+        for (int v = 0; v < V; v++) {
+            if (match[v] == -1) {
+                memset(used, false, sizeof(used));
+                if (dfs(v)) {
+                    res++;
+                }
+            }
+        }
+        return res;
+    }
+
+    int main() {
+        int N, K;
+        scanf("%d %d", &N, &K);
+        for (int i = 0; i < K; i++) {
+            int r, c; scanf("%d %d", &r, &c); r--; c--;
+            int r_idx = r;
+            int c_idx = N + c;
+            add_edge(r_idx, c_idx);
+        }
+
+        V = 2 * N;
+        printf("%d\n", bipartite_matching());
+
+        return 0;
+    }
