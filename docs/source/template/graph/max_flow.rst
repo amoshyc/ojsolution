@@ -14,26 +14,54 @@ Max Flow
 程式碼
 ************************
 
+Declaration
+
 .. code-block:: cpp
     :linenos:
 
+    // ===== Declaration of DinicGraph =====
     struct Edge {
         int to, cap, rev;
     };
+    struct DinicGraph {
+        const static int INF = 0x3f3f3f3f;
+        int V;
+        vector< vector<Edge> > g;
+        vector<int> iter;
+        vector<int> level;
+        DinicGraph();
+        DinicGraph(int v);
+        void add_edge(int u, int v, int cap);
+        void bfs(int s);
+        int dfs(int v, int t, int f);
+        int max_flow(int s, int t);
+    };
+    // ===== end of Declaration =====
+    
 
-    const int INF = 0x3f3f3f3f;
-    const int MAX_V = 400 + 10;
-    vector<Edge> g[MAX_V];
-    int level[MAX_V];
-    int iter[MAX_V];
+Implementation
 
-    void add_edge(int u, int v, int cap) {
+.. code-block:: cpp
+    :linenos:
+
+    // ===== Implementation of DinicGraph =====
+    DinicGraph::DinicGraph() {
+        ;
+    }
+
+    DinicGraph::DinicGraph(int v): V(v) {
+        g = vector< vector<Edge> >(V, vector<Edge>());
+        iter = vector<int>(V, 0);
+        level = vector<int>(V, 0);
+    }
+
+    void DinicGraph::add_edge(int u, int v, int cap) {
         g[u].push_back((Edge){v, cap, (int)g[v].size()});
         g[v].push_back((Edge){u, 0, (int)g[u].size() - 1});
     }
 
-    void bfs(int s) {
-        memset(level, -1, sizeof(level));
+    void DinicGraph::bfs(int s) {
+        fill(level.begin(), level.end(), -1);
         queue<int> q;
 
         level[s] = 0;
@@ -51,7 +79,7 @@ Max Flow
         }
     }
 
-    int dfs(int v, int t, int f) {
+    int DinicGraph::dfs(int v, int t, int f) {
         if (v == t) return f;
         for (size_t i = iter[v]; i < g[v].size(); i++) {
             Edge& e = g[v][i];
@@ -67,21 +95,22 @@ Max Flow
         return 0;
     }
 
-    int max_flow(int s, int t) { // dinic
+    int DinicGraph::max_flow(int s, int t) { // dinic
         int flow = 0;
         for (;;) {
             bfs(s);
             if (level[t] < 0) return flow;
-            memset(iter, 0, sizeof(iter));
+            fill(iter.begin(), iter.end(), 0);
             int f;
             while ((f = dfs(s, t, INF)) > 0) {
                 flow += f;
             }
         }
     }
+    // ===== end of Implementation =====
 
 ************************
 模板驗證
 ************************
 
-`poj3281 <http://codepad.org/ORsFCVIN>`_
+`poj3281 <http://codepad.org/4b9iHEW4>`_
