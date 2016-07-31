@@ -105,13 +105,6 @@ Segment Tree
 
 .. code-block:: cpp
 
-    #include <iostream>
-    #include <vector>
-    #include <cstdio>
-    #include <cstdlib>
-    #include <cstring>
-    using namespace std;
-
     template<class T>
     struct SegTree {
         int NN;

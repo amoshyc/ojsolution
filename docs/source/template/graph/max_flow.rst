@@ -14,9 +14,9 @@ Max Flow
 程式碼
 ************************
 
-=============
-Declaration
-=============
+=================
+Structure Version
+=================
 
 .. code-block:: cpp
     :linenos:
@@ -40,9 +40,6 @@ Declaration
     };
     // ===== end of Declaration =====
 
-==============
-Implementation
-==============
 
 .. code-block:: cpp
     :linenos:
@@ -112,9 +109,9 @@ Implementation
     }
     // ===== end of Implementation =====
 
-===========
-Origin
-===========
+================
+Function Version
+================
 
 .. code-block:: cpp
     :linenos:

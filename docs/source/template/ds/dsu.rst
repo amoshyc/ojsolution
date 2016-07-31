@@ -33,7 +33,7 @@ Disjoint Set 並查集
             a = root(a);
             b = root(b);
             if (a == b) return; // already in same set
-            if (-par[a] > -par[b]) swap(a, b); // if (rank[a] > rank[b])
+            if (-par[a] > -par[b]) swap(a, b); // if (size[a] > size[b])
             par[b] += par[a]; // size[b] += size[a]
             par[a] = b;
         }
@@ -42,7 +42,7 @@ Disjoint Set 並查集
             return root(a) == root(b);
         }
 
-        int size(int a) {
+        int size(int a) { // correct if a is root
             return -par[a];
         }
     };
