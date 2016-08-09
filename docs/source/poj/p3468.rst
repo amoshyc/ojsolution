@@ -4,8 +4,7 @@
 
 .. sidebar:: Tags
 
-    - ``tag_binary_search``
-    - ``tag_greedy``
+    - ``tag_segment_tree``
 
 .. contents:: TOC
     :depth: 2

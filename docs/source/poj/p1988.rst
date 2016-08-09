@@ -1,0 +1,128 @@
+#####################################
+[POJ] 1988. Cube Stacking
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_dsu``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=1988>`_
+******************************************************
+
+給定 N 個 cube 排成一列。一開始每個都放在一個 stack 中，之後會有 P 個操作::
+
+    1. M a b: 將 cube a 所在的 stack 移動到 cube b 所在的 stack 的頂端
+    2. M x: 輸出 cube x 底下有幾個 cube
+
+************************
+Specification
+************************
+
+::
+
+    N = 30000
+    1 <= P <= 10^5
+
+************************
+分析
+************************
+
+.. note:: 帶權並查集
+
+每個 stack 可以用並查集存。
+stack 的頂端即為並查集的 root。
+
+帶權並查集::
+
+    節點 u 到 root 經過的所有邊的加總，即為節點 u 在該樹中的 level (0-based)
+
+可以推出, 節點 u 底下的節點數即為::
+
+    該樹的總節點數 - 節點 u 的 level - 1
+
+路徑壓縮時，記得維護權重。以下是示意圖：
+
+.. image:: http://i.imgur.com/OycLDrk.png
+
+左邊是合併時的示意圖，其中 4 為 A 那棵樹的大小（總節點數），
+右邊是查詢（路徑壓縮）F 後的結果，注意 F 的權重變成 5：
+
+.. image:: http://i.imgur.com/BLbcAEY.png
+
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+    :emphasize-lines: 27,38,58
+
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    const int MAX_N = 30000;
+    int N = MAX_N, P;
+
+    int par[MAX_N];
+    int val[MAX_N];
+
+    void init() {
+        fill(par, par + N, -1);
+        fill(val, val + N, 0);
+    }
+
+    int root(int u) {
+        if (par[u] < 0) {
+            return u;
+        }
+
+        int p = par[u];
+        par[u] = root(p);
+        val[u] += val[p];
+        return par[u];
+    }
+
+    void move(int a, int b) {
+        // move stack containing a on top of stack containing b
+        a = root(a);
+        b = root(b);
+        if (a == b)
+            return;
+
+        val[b] = -par[a];
+        par[a] += par[b];
+        par[b] = a;
+    }
+
+    int main() {
+        scanf("%d", &P);
+
+        init();
+        while (P--) {
+            char cmd[10];
+            scanf("%s", cmd);
+
+            if (cmd[0] == 'M') {
+                int a, b; scanf("%d %d", &a, &b); a--; b--;
+                move(a, b);
+            }
+            else {
+                int u; scanf("%d", &u); u--;
+                int r = root(u);
+                printf("%d\n", (-par[r]) - val[u] - 1);
+            }
+        }
+
+        return 0;
+    }
