@@ -1,0 +1,155 @@
+#####################################
+[POJ] 1308. Is It A Tree?
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_dsu``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=1308>`_
+******************************************************
+
+給定一堆有向邊，請問該圖形是不是一棵樹？
+
+************************
+Specification
+************************
+
+************************
+分析
+************************
+
+.. note:: 並查集簡單應用
+
+樹得滿足幾個條件::
+
+    1. E = V - 1
+    2. 沒有環
+    3. 連通
+
+另外根據題意，空樹也是樹，得特殊判斷。對了，森林也不是樹。
+用並查集可以輕易判斷上述三點，寫在程式碼的註解裡了。
+
+其中第三點，我採用的作法為隨便抓一個節點，看它所在的 dsu 樹的大小。
+如果是一棵連通的樹，不管你選哪個節點，該節點所在的那棵 dsu 樹的大小必需等於 V。
+（不管你選哪個節點，都應該要在同一棵 dsu 樹中，所以該樹包含所有節點）
+
+實作時，這題先離散化一下會比較好處理。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    typedef pair<int, int> pii;
+    #define st first
+    #define nd second
+
+    int V, E;
+    vector<int> par;
+    vector<int> vs;
+    vector<pii> es;
+
+    int root(int u) {
+        if (par[u] < 0) return u;
+        return (par[u] = root(par[u]));
+    }
+
+    void unite(int u, int v) {
+        u = root(u);
+        v = root(v);
+        if (u == v)
+            return;
+
+        par[v] += par[u];
+        par[u] = v;
+    }
+
+    bool same(int u, int v) {
+        return root(u) == root(v);
+    }
+
+    bool solve() {
+        // 離散化
+        sort(vs.begin(), vs.end());
+        V = unique(vs.begin(), vs.end()) - vs.begin();
+        E = es.size();
+
+        // 空樹
+        if (E == 0) {
+            return true;
+        }
+
+        // 第一點
+        if (E != V - 1) {
+            return false;
+        }
+
+        // 離散化
+        vs.resize(V);
+        for (int i = 0; i < E; i++) {
+            es[i].st = lower_bound(vs.begin(), vs.end(), es[i].st) - vs.begin();
+            es[i].nd = lower_bound(vs.begin(), vs.end(), es[i].nd) - vs.begin();
+        }
+
+        // 第二點
+        par = vector<int>(V, -1);
+        for (int i = 0; i < E; i++) {
+            int u = es[i].st, v = es[i].nd;
+            if (same(u, v))
+                return false;
+            unite(u, v);
+        }
+
+        // 第三點
+        int r = root(0);
+        if (-par[r] != V)
+            return false;
+        return true;
+    }
+
+    int main() {
+        int tc = 1;
+
+        int a, b;
+        while (scanf("%d %d", &a, &b)) {
+            if (a == -1 && b == -1) break;
+            if (a == 0 && b == 0) {
+                if (solve()) {
+                    printf("Case %d is a tree.\n", tc);
+                }
+                else {
+                    printf("Case %d is not a tree.\n", tc);
+                }
+
+                tc++;
+                par.clear();
+                vs.clear();
+                es.clear();
+
+                continue;
+            }
+
+            a--; b--;
+            vs.push_back(a);
+            vs.push_back(b);
+            es.push_back(pii(a, b));
+        }
+
+        return 0;
+    }

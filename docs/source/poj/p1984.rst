@@ -1,0 +1,243 @@
+#####################################
+[POJ] 1984. Navigation Nightmare
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_dsu``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=1984>`_
+******************************************************
+
+二維平面上有 N 個農場，給定他們之間的 M 個關係
+
+每個關係為農場 u 到農場 v::
+
+    1. 東西方向的位移是多少
+    或
+    2. 南北方向的位移是多少
+
+其中，所有的位移都不超過 1000
+
+之後有 K 個詢問 <F1[i], F2[i], I[i]> 針對詢問 i，
+請輸出只考慮前 I[i] 個關係，農場 F1[i] 到農場 F2[i] 的曼哈頓距離為多少，
+無解時輸出 -1
+
+
+************************
+Specification
+************************
+
+::
+
+    2 <= N <= 40000
+    1 <= M < 40000
+    1 <= K <= 10000
+
+
+************************
+分析
+************************
+
+.. note:: 帶權並查集
+
+基本上就是 `poj1988 <./p1988.html>`_ 的進階版。
+
+首先曼哈頓距離滿足加法與減法，就像向量一樣，所以以下都用向量來思考。
+
+.. math::
+
+    \vec {AB} = \vec {AC} + \vec {CB} \\
+    \vec {AB} = \vec {CB} - \vec {CA}
+
+帶權並查集::
+
+    每個邊存一個「向量」<val_x[u], val_y[u]>
+    節點 u 到 root 經過的所有邊，邊上的向量的加總，即為 root 相對 u 的位移
+
+假設節點是 :math:`A`，root 是 :math:`R`，即為 :math:`\vec {AR}`，
+剛好跟 dsu tree 的邊的方向一樣。
+
+路徑壓縮時就跟 `poj1988 <./p1988.html>`_ 一樣，直接累加即可。
+
+合併時比較複雜，這裡舉個例，
+假設現在有兩個已壓縮過的 dsu 樹，
+新加入的關係為 :math:`\vec { FC }`
+我們會在 dsu 中加入 :math:`\vec {EA}` 即 ``par[E] = A``，
+注意 :math:`\vec { FC }` 並沒有被加入 dsu 中！
+
+.. image:: https://i.imgur.com/t7bTXya.png
+
+合併後的結果應為如下
+
+.. image:: https://i.imgur.com/TWmiGum.png
+
+可從圖中發現
+
+.. math::
+
+    \vec {EA} = \vec {CA} + \vec {FC} + (- \vec {FE})
+
+這明顯是正確的，因為上式就是下面這個式子的移位與反向
+
+.. math::
+
+    \vec {EA} = \vec {EF} + \vec {FC} + \vec {CA}
+
+---------------
+
+當詢問 :math:`U` 與 :math:`V` 時，首先，若他們不在同一個集合中，那當然沒解。
+如果在的話，則答案為（:math:`U`, :math:`V` 已先路徑壓縮）::
+
+    abs(val_x[u] - val_x[y]) + abs(val_y[u] - val_y[y])
+
+這是因為（假設他們所在的 dsu 樹的 root 為 :math:`R`）:
+
+:math:`\vec {UV}` 的曼哈頓距離即為 :math:`|\vec {UV}.x| + |\vec {UV}.y|`，而
+
+.. math::
+
+    \vec {UV} = \vec{RV} - \vec{RU}
+
+所以答案即為
+
+.. math::
+
+    |\vec{RV}.x - \vec{RU}.x| + |\vec{RV}.y - \vec{RU}.y|
+
+----------------
+
+實作時，稍為複雜，因為題目沒有保證 t 是遞增的，
+所以還是乖乖地自己排個序，求解，再還原吧。
+另外，我是訂 North 即為 +y 方向，East 為 +x 方向…。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    struct Query {
+        int u, v, t, id, ans;
+    };
+
+    bool cmp_by_t(const Query& q1, const Query& q2) {
+        return q1.t < q2.t;
+    }
+    bool cmp_by_id(const Query& q1, const Query& q2) {
+        return q1.id < q2.id;
+    }
+
+    struct Road {
+        int u, v, dx, dy;
+    };
+
+    int V, E, K;
+    vector<Road> roads;
+    vector<Query> queries;
+
+    vector<int> par;
+    vector<int> val_x;
+    vector<int> val_y;
+
+    int root(int u) {
+        if (par[u] < 0) {
+            return u;
+        }
+
+        int p = par[u];
+        int r = root(p);
+        val_x[u] += val_x[p];
+        val_y[u] += val_y[p];
+        par[u] = r;
+        return r;
+    }
+
+    void unite(int u, int v, int dx, int dy) {
+        int ru = root(u);
+        int rv = root(v);
+        if (ru == rv)
+            return;
+
+        val_x[ru] = val_x[v] + dx - val_x[u];
+        val_y[ru] = val_y[v] + dy - val_y[u];
+        par[rv] += par[ru];
+        par[ru] = rv;
+    }
+
+    bool same(int u, int v) {
+        return root(u) == root(v);
+    }
+
+    int main() {
+        scanf("%d %d", &V, &E);
+
+        for (int i = 0; i < E; i++) {
+            Road r; int w; char dir[10];
+            scanf("%d %d %d %s", &r.u, &r.v, &w, dir);
+            r.u--; r.v--;
+            if (dir[0] == 'N') { r.dx = 0; r.dy = +w; }
+            if (dir[0] == 'S') { r.dx = 0; r.dy = -w; }
+            if (dir[0] == 'E') { r.dx = +w; r.dy = 0; }
+            if (dir[0] == 'W') { r.dx = -w; r.dy = 0; }
+            roads.push_back(r);
+        }
+
+        scanf("%d", &K);
+        for (int i = 0; i < K; i++) {
+            Query q;
+            scanf("%d %d %d", &q.u, &q.v, &q.t);
+            q.u--; q.v--; q.t--;
+            q.id = i;
+            q.ans = -1;
+            queries.push_back(q);
+        }
+
+        par = vector<int>(V, -1);
+        val_x = vector<int>(V, 0);
+        val_y = vector<int>(V, 0);
+        sort(queries.begin(), queries.end(), cmp_by_t);
+
+        int idx = -1; // last processed roads
+        for (int i = 0; i < K; i++) {
+            Query& q = queries[i];
+
+            // process to Road q.t
+            for (int j = idx + 1; j <= q.t; j++) {
+                const Road& r = roads[j];
+                unite(r.u, r.v, r.dx, r.dy);
+            }
+            idx = q.t;
+
+            // query
+            if (!same(q.u, q.v)) {
+                q.ans = -1;
+                continue;
+            }
+
+            // root(q.u);
+            // root(q.v); // doesn't need, already triggered in same()
+            q.ans = abs(val_x[q.v] - val_x[q.u]) + abs(val_y[q.v] - val_y[q.u]);
+        }
+
+        sort(queries.begin(), queries.end(), cmp_by_id);
+        for (int i = 0; i < K; i++) {
+            printf("%d\n", queries[i].ans);
+        }
+
+        return 0;
+    }
