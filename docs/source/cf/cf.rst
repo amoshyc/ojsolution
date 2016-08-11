@@ -22,3 +22,5 @@ CF (Codeforces)
     Regular Round #343 <cf343/index.rst>
 
     Regular Round #342 <cf342/index.rst>
+
+    Regular Round #319 <cf319/index.rst>
