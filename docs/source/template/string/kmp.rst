@@ -51,6 +51,29 @@ KMP
         return cnt;
     }
 
+
+Code rewritten from CLRS:
+
+.. code-block:: cpp
+    :linenos:
+
+    vector<int> get_fail(const string& s) {
+        int len = s.length();
+        vector<int> F(len, 0);
+
+        F[0] = 0;
+        int k = 0; // candidate len
+        for (int i = 1; i < len; i++) {
+            while (k > 0 && s[k] != s[i])
+                k = F[k - 1]; // since we're 0-based
+            if (s[k] == s[i])
+                k++;
+            F[i] = k;
+        }
+
+        return F;
+    }
+
 ************************
 模板驗證
 ************************

@@ -28,6 +28,7 @@ Technique
 - tag_combination
 - mod_inverse
 - tag_min_vertex_cover
+- tag_pigeonhole
 
 ************************
 Data Structure
