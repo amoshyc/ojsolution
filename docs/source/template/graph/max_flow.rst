@@ -69,7 +69,7 @@ Structure Version
 
         while (!q.empty()) {
             int v = q.front(); q.pop();
-            for (size_t i = 0; i < g[v].size(); i++) {
+            for (int i = 0; i < int(g[v].size()); i++) {
                 const Edge& e = g[v][i];
                 if (e.cap > 0 && level[e.to] < 0) {
                     level[e.to] = level[v] + 1;
@@ -81,7 +81,7 @@ Structure Version
 
     int DinicGraph::dfs(int v, int t, int f) {
         if (v == t) return f;
-        for (size_t i = iter[v]; i < g[v].size(); i++) {
+        for (int& i = iter[v]; i < int(g[v].size()); i++) {
             Edge& e = g[v][i];
             if (e.cap > 0 && level[v] < level[e.to]) {
                 int d = dfs(e.to, t, min(f, e.cap));
@@ -118,15 +118,21 @@ Function Version
 
     struct Edge {
         int to, cap, rev;
+        Edge(int a, int b, int c) {
+            to = a;
+            cap = b;
+            rev = c;
+        }
     };
 
     const int INF = 0x3f3f3f3f;
     const int MAX_V = 20000 + 10;
-    vector<Edge> g[MAX_V];
+    // vector<Edge> g[MAX_V];
+    vector< vector<Edge> > g(MAX_V);
     int level[MAX_V];
     int iter[MAX_V];
 
-    void add_edge(int u, int v, int cap) {
+    inline void add_edge(int u, int v, int cap) {
         g[u].push_back((Edge){v, cap, (int)g[v].size()});
         g[v].push_back((Edge){u, 0, (int)g[u].size() - 1});
     }
@@ -140,7 +146,7 @@ Function Version
 
         while (!q.empty()) {
             int v = q.front(); q.pop();
-            for (size_t i = 0; i < g[v].size(); i++) {
+            for (int i = 0; i < int(g[v].size()); i++) {
                 const Edge& e = g[v][i];
                 if (e.cap > 0 && level[e.to] < 0) {
                     level[e.to] = level[v] + 1;
@@ -152,7 +158,7 @@ Function Version
 
     int dfs(int v, int t, int f) {
         if (v == t) return f;
-        for (size_t i = iter[v]; i < g[v].size(); i++) {
+        for (int& i = iter[v]; i < int(g[v].size()); i++) {
             Edge& e = g[v][i];
             if (e.cap > 0 && level[v] < level[e.to]) {
                 int d = dfs(e.to, t, min(f, e.cap));
