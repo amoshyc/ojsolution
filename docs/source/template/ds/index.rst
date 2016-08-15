@@ -10,3 +10,4 @@ Data Structure
     sparse_table.rst
     bit.rst
     bit2d.rst
+    trie.rst
