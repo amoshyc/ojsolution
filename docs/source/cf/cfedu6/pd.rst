@@ -56,16 +56,13 @@ Specification
 
 二次時，使用折半列舉的技巧，首先，先建表::
 
-    Let AA = [sumB + A[i] + A[j] for i in [0, N) for j in [i + 1, N)]
-        BB = [sumA + B[i] + B[j] for i in [0, M) for j in [i + 1, M)]
+    Let AA = [sumB + 2 * (A[i] + A[j]) for i in [0, N) for j in [i + 1, N)]
+        BB = [sumA + 2 * (B[i] + B[j]) for i in [0, M) for j in [i + 1, M)]
 
     sort(BB)
 
-之後枚舉 AA 中的每一項 AA[i]，看 BB 中最 **接近** ::
-
-    sumB + 2 * AA[i]
-
-的是多少，交換看看。這麼做是正確的是因為新的總和變成::
+之後枚舉 AA 中的每一項 AA[i]，看 BB 中最 **接近** AA[i] 的是多少，交換看看。
+這麼做是正確的是因為新的總和變成::
 
     假設是選到 AA[a], BB[b] 這兩項
     new_sumA = sumA - AA[a] + BB[b]
