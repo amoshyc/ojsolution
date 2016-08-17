@@ -1,6 +1,8 @@
 ########################
-UVA (UVa Online Judge)
+UVA
 ########################
+
+UVa Online Judge
 
 .. toctree::
     :maxdepth: 1

@@ -1,5 +1,5 @@
 ##########################
-CF Educational Round #12
+Educational Round #12
 ##########################
 
 .. toctree::
