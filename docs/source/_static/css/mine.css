@@ -26,7 +26,7 @@ html body div[class^='highlight'] pre {
 
 /*``literal``*/
 .rst-content tt.literal, .rst-content tt.literal, .rst-content code.literal {
-    font-size: 13px;
+    font-size: 15px;
     border: none;
     font-family: "Oxygen Mono","Droid Sans Mono","Courier New",Courier,monospace;
 }
@@ -35,4 +35,13 @@ body p {
     white-space: pre-wrap;
     font-size: 15px;
     font-family: "Oxygen Mono","Droid Sans Mono","Courier New",Courier,monospace;
+}
+
+body ol li {
+    font-size: 15px;
+    font-family: "Oxygen Mono","Droid Sans Mono","Courier New",Courier,monospace;
+}
+
+.sidebar span {
+    font-size: 13px;
 }
