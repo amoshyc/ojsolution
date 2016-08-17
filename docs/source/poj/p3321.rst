@@ -1,0 +1,132 @@
+#####################################
+[POJ] 3321. Apple Tree
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_dfs``
+    - ``tag_bit``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=3321>`_
+******************************************************
+
+給定一個大小為 N 的樹，根為編號 1，一開始每個節點都有一個蘋果，
+請寫一個程式支援 M 個操作，操作的種類為
+
+    1. ``C x``: 更改節點 x 的蘋果的狀態（無 -> 有，有 -> 無）
+    2. ``Q x``: 請輸出以 x 為根的子樹中，有多少顆蘋果
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 10^5
+    1 <= M <= 10^5
+
+************************
+分析
+************************
+
+.. note:: dfs 轉區間問題
+
+如同 `cf edu6 e <../cf/cfedu6/pe.html>`_ ，先用 dfs 把樹的操作轉成區間操作:
+
+    1. ``C x``: 更改 [idxL[x], idxR[x]) 的狀態 (0 -> 1, 1 -> 0)
+    2. ``Q x``: 詢問 [idxL[x], idR[x]) 的總和
+
+於是就用 bit 搞一搞就可以了。
+
+這題用 array of vector 來存圖會莫名 TLE，改成 vector of vector 就神奇地可以了…
+可能是 poj 的 compiler 太舊的關係。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    const int MAX_N = 100000;
+    int N, M;
+
+    // [, )
+    int idxL[MAX_N];
+    int idxR[MAX_N];
+    vector< vector<int> > g(MAX_N);
+    bool pick[MAX_N];
+
+    int bit[MAX_N + 10];
+    inline int sum(int idx) {
+        int s = 0;
+        for (int i = idx; i > 0; i -= (i & -i))
+            s += bit[i];
+        return s;
+    }
+    inline void add(int idx, int x) {
+        for (int i = idx; i <= N; i += (i & -i))
+            bit[i] += x;
+    }
+
+    int dfn = 1;
+    inline void dfs(int u, int p) {
+        idxL[u] = dfn++;
+        int sz = g[u].size();
+        for (int i = 0; i < sz; i++) {
+            int v = g[u][i];
+            if (v == p) continue;
+            else dfs(v, u);
+        }
+        idxR[u] = dfn;
+    }
+
+    int main() {
+        scanf("%d", &N);
+        for (int i = 0; i < N - 1; i++) {
+            int u, v; scanf("%d %d", &u, &v);
+            u--; v--;
+            g[u].push_back(v);
+            g[v].push_back(u);
+        }
+
+        dfs(0, -1);
+
+        for (int v = 0; v < N; v++) {
+            add(idxL[v], +1);
+            pick[v] = false;
+        }
+
+        scanf("%d", &M);
+        while (M--) {
+            char cmd[2]; int u;
+            scanf("%s %d", cmd, &u);
+            u--;
+
+            if (cmd[0] == 'C') {
+                if (pick[u])
+                    add(idxL[u], +1);
+                else
+                    add(idxL[u], -1);
+                pick[u] = !pick[u];
+            }
+            else {
+                int cnt = sum(idxR[u] - 1) - sum(idxL[u] - 1);
+                printf("%d\n", cnt);
+            }
+        }
+
+        return 0;
+    }
