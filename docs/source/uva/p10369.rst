@@ -1,0 +1,302 @@
+#####################################
+[UVA] 10369. Arctic Network
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_kruskal``
+    - ``tag_binary_search``
+
+.. contents:: TOC
+    :depth: 2
+
+*********************************************************************
+`題目 <https://uva.onlinejudge.org/external/103/p10369.pdf>`_
+*********************************************************************
+
+給定一個平面上 V 個點，任兩點 u, v 直接通訊有二種方法:
+
+    1. 如果 u, v 都有安裝衛星頻道，則他們通訊不需任何成本
+    2. 要不然，u, v 的通訊成本為他們之間距離
+
+如果 u, v 有直接通訊，且 v, w 也有直接通訊，那 u, w 之間可以間接通訊。
+現有 S 個衛星頻道可以安裝，如果要使所有點之間都能通訊（直接或間接），
+定義 D 為所有直接通訊中成本的最大值，請最小化並輸出 D。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= S <= 100
+    S < V <= 500
+    0 <= x[i], y[i] <= 1e4
+
+************************
+分析
+************************
+
+.. note:: 最大值最小化
+
+將所有直接通訊視為一條邊，邊的權重即為直接通訊的成本，即可看出這題跟最小生成樹有關。
+
+最小化 D 這個所有邊中的最大值，這是二分搜的標準題。
+二分搜 D，並使用判斷函式::
+
+    bool C(x) = 只使用權重 <= x 的邊，與 S 個衛星頻道，可否使所有點連通。
+
+且有單調性::
+
+    0 0 0 1 1 1
+
+而判斷函式的實作可以利用 Kruskal's algorithm。
+先只使用權重 <= x 的邊，跑 Kruskal，跑完後整個圖會被切成幾個連通單元。
+之後再看連通單元的數量是否 <= S，因為我們得在每個連通單元都放一個衛星頻道，整個圖才會連通。
+
+那要怎麼看有幾個連通單元呢，我們可以利用跑 Kruskal 時使用的那個 dsu。
+一個連通單元在 dsu 上必表現為一棵樹，而在 dsu 中每棵樹必有唯一一個根節點，
+
+所以 Kruskal 跑完後，數數 dsu 中有幾個節點滿足（即有幾個點是根節點）::
+
+    par[dsu] < 0
+
+就可以得到該數量了。
+
+------------------------
+
+這題可以再優化，很明顯地衛星頻道我們一定是盡量用，畢竟不用成本。
+
+::
+
+    S 個衛星頻道可以創造出 S - 1 條不用成本的邊
+
+而一棵 MST 有 V - 1 條邊，我們當然是把 MST 中成本最大的那 S - 1 條邊，
+換成這 S - 1 條零成本的邊，而 D 就是那些剩下沒被換掉的邊中的最大值。
+
+以下給出兩種寫法的程式碼。
+
+************************
+AC Code 1
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    struct Dsu {
+        vector<int> par;
+
+        Dsu(int V) {
+            par = vector<int>(V, -1);
+        }
+
+        int root(int a) {
+            if (par[a] < 0) return a;
+            return (par[a] = root(par[a]));
+        }
+
+        void unite(int a, int b) {
+            a = root(a);
+            b = root(b);
+            if (a == b) return; // already in same set
+            if (-par[a] > -par[b]) swap(a, b); // if (size[a] > size[b])
+            par[b] += par[a]; // size[b] += size[a]
+            par[a] = b;
+        }
+
+        bool same(int a, int b) {
+            return root(a) == root(b);
+        }
+
+        bool is_root(int a) {
+            return par[a] < 0;
+        }
+    };
+
+    struct Edge {
+        int u, v;
+        double dis;
+
+        bool operator < (const Edge& e) const {
+            return dis < e.dis;
+        }
+    };
+
+    int V, S;
+    vector<Edge> edges;
+
+    int kruskal(double x) {
+        auto dsu = Dsu(V);
+
+        for (const Edge& e : edges) {
+            if (e.dis > x)
+                break;
+            if (!dsu.same(e.u, e.v)) {
+                dsu.unite(e.u, e.v);
+            }
+        }
+
+        // 回傳圖被分成幾個連通單元
+        int cnt = 0;
+        for (int v = 0; v < V; v++)
+            if (dsu.is_root(v))
+                cnt++;
+        return cnt;
+    }
+
+    bool C(double x) {
+        // 連通單元的數量是否 <= S
+        return kruskal(x) <= S;
+    }
+
+    int main() {
+        int TC; scanf("%d", &TC);
+        while (TC--) {
+            edges.clear();
+
+            scanf("%d %d", &S, &V);
+
+            auto x = vector<int>(V, 0);
+            auto y = vector<int>(V, 0);
+
+            for (int i = 0; i < V; i++) {
+                scanf("%d %d", &x[i], &y[i]);
+            }
+
+            for (int i = 0; i < V - 1; i++) {
+                for (int j = i + 1; j < V; j++) {
+                    double dx = x[i] - x[j];
+                    double dy = y[i] - y[j];
+                    double dis = sqrt(dx * dx + dy * dy);
+                    edges.push_back((Edge) {i, j, dis});
+                }
+            }
+
+            sort(edges.begin(), edges.end());
+
+            double lb = 0.0, ub = 1e7;
+            // 0 0 0 0 1 1 1
+            for (int i = 0; i < 100; i++) {
+                double mid = (lb + ub) / 2.0;
+                if (C(mid)) ub = mid;
+                else lb = mid;
+            }
+
+            printf("%.2f\n", ub);
+        }
+
+        return 0;
+    }
+
+
+
+************************
+AC Code 2
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    struct Dsu {
+        vector<int> par;
+
+        Dsu(int V) {
+            par = vector<int>(V, -1);
+        }
+
+        int root(int a) {
+            if (par[a] < 0) return a;
+            return (par[a] = root(par[a]));
+        }
+
+        void unite(int a, int b) {
+            a = root(a);
+            b = root(b);
+            if (a == b) return; // already in same set
+            if (-par[a] > -par[b]) swap(a, b); // if (size[a] > size[b])
+            par[b] += par[a]; // size[b] += size[a]
+            par[a] = b;
+        }
+
+        bool same(int a, int b) {
+            return root(a) == root(b);
+        }
+
+        bool is_root(int a) {
+            return par[a] < 0;
+        }
+    };
+
+    struct Edge {
+        int u, v;
+        double dis;
+
+        bool operator < (const Edge& e) const {
+            return dis < e.dis;
+        }
+    };
+
+    int V, S;
+    vector<Edge> edges;
+
+    double kruskal() {
+        sort(edges.begin(), edges.end());
+
+        auto dsu = Dsu(V);
+
+        int e_cnt = 0;
+        double max_dis = -1;
+
+        // if (S - 1 == V - 1) { // not need, V > S
+        //     return 0.0;
+        // }
+
+        for (const Edge& e : edges) {
+            if (!dsu.same(e.u, e.v)) {
+                dsu.unite(e.u, e.v);
+                e_cnt++;
+                max_dis = max(max_dis, e.dis);
+
+                if (e_cnt + (S - 1) == V - 1) {
+                    return max_dis;
+                }
+            }
+        }
+
+        return max_dis;
+    }
+
+    int main() {
+        int TC; scanf("%d", &TC);
+        while (TC--) {
+            edges.clear();
+
+            scanf("%d %d", &S, &V);
+
+            auto x = vector<int>(V, 0);
+            auto y = vector<int>(V, 0);
+
+            for (int i = 0; i < V; i++) {
+                scanf("%d %d", &x[i], &y[i]);
+            }
+
+            for (int i = 0; i < V - 1; i++) {
+                for (int j = i + 1; j < V; j++) {
+                    double dx = x[i] - x[j];
+                    double dy = y[i] - y[j];
+                    double dis = sqrt(dx * dx + dy * dy);
+                    edges.push_back((Edge) {i, j, dis});
+                }
+            }
+
+            printf("%.2f\n", kruskal());
+        }
+
+        return 0;
+    }

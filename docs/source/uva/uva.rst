@@ -8,3 +8,4 @@ UVa Online Judge
     :maxdepth: 1
 
     p10032.rst
+    p10369.rst

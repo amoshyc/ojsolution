@@ -10,6 +10,7 @@ POJ
     p1984.rst
     p1988.rst
     p1990.rst
+    p2349.rst
     p2441.rst
     p2686.rst
     p2836.rst
