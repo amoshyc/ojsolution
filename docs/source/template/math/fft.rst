@@ -114,7 +114,7 @@ FFT
         for(int i = 0; i < nn; i++) {
             int val = int(fa[i].real + 0.5);
             if (val) {
-                while(int(c.size()) <= i)
+                while (int(c.size()) <= i)
                     c.push_back(0);
                 c[i] = 1;
             }

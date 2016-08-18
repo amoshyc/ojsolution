@@ -50,11 +50,11 @@ Specification
 
     (x^8) + (2 * x^7) + (x^6) + (2 * x^5) + (2 * x^4) + (x^2)
 
-也就是說，拿二個時，能達到的數字為（升序）::
+也就是說，拿二個時，能達到的數字為::
 
     8 7 6 5 4 2
 
-而這題拿 K 個，就是是 P^K，可以用個快速冪加個速來確保不會 TLE
+而這題拿 K 個，就是 P^K，可以用個快速冪加速來確保不會 TLE
 
 --------------------------------
 
@@ -172,8 +172,8 @@ AC Code
         vector<int> c;
         for(int i = 0; i < nn; i++) {
             int val = int(fa[i].real + 0.5);
-            if(val) {
-                while(int(c.size()) <= i)
+            if (val) {
+                while (int(c.size()) <= i)
                     c.push_back(0);
                 c[i] = 1;
             }
