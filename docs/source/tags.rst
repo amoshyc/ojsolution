@@ -35,6 +35,7 @@ Data Structure
 ************************
 
 - tag_dsu
+- tag_dsu_w
 - tag_segment_tree
 - tag_bit
 - tag_priority_queue

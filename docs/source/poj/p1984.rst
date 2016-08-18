@@ -4,7 +4,7 @@
 
 .. sidebar:: Tags
 
-    - ``tag_dsu``
+    - ``tag_dsu_w``
 
 .. contents:: TOC
     :depth: 2
