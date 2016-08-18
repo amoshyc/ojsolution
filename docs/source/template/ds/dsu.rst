@@ -18,10 +18,11 @@ Disjoint Set 並查集
     :linenos:
 
     struct Dsu {
-        int par[1000 * 1000];
+        vector<int> par;
 
-        void init() {
-            memset(par, -1, sizeof(par)); // par[i] = -rank[i] if i is root
+        Dsu(){}
+        Dsu(int N) {
+            par = vector<int>(N, -1);
         }
 
         int root(int a) {
