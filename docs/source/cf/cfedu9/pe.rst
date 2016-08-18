@@ -1,25 +1,84 @@
 ###################################################
-FFT
+[cfedu9] E. Thief in a Shop
 ###################################################
 
 .. sidebar:: Tags
 
     - ``tag_fft``
-    - ``tag_template``
 
 .. contents:: TOC
     :depth: 2
 
+
+******************************************************
+`題目 <http://codeforces.com/contest/632/problem/E>`_
+******************************************************
+
+給定一個背包可以容納 K 個物品，現在 N 種物品，第 i 種物品價值 A[i]，且有無限多個。
+請問在考慮所有放法，背包放入 K 個物品，背包內的物品價值和可以達到哪些數字？
+
 ************************
-程式碼
+Specification
 ************************
 
-原理請去看 CLRS，寫得非常好。
-這演算法的瓶頸似乎是在 bit-reverse-copy 的地方
-如果使用我原始 O(nlgn) 的寫法，在一些題目時間可以差到 1s 以上
+::
+
+    1 <= N, K <= 10^3
+    1 <= A[i] <= 10^3
+
+************************
+分析
+************************
+
+.. note:: fft
+
+算是 fft 的標準題（？
+這是我第一個 fft 題…
+
+先考慮只拿一個，能達到的數字當然就是所有物品的價值 A[0], A[1], ..., A[N - 1]
+把它轉成一個多項式 P，若數字 i 在 A 中，那 x^i 的係數就是 1，要不然就是 0。
+
+舉個例，假設 A = [1, 3, 4]，那 P 就是::
+
+    x^4 + x^3 + x
+
+就我的感想，這就只是用一個多項式而不是一個 bool 陣列，來存各個數字可不可以達到。
+這有什麼優點呢？如果我們要拿二個，我們只需把 P 平方，
+如果 x^i 項的係數不為 0，那 i 這個數字就是可以達到的。
+同一個例子，P^2 =
+::
+
+    (x^8) + (2 * x^7) + (x^6) + (2 * x^5) + (2 * x^4) + (x^2)
+
+也就是說，拿二個時，能達到的數字為（升序）::
+
+    8 7 6 5 4 2
+
+而這題拿 K 個，就是是 P^K，可以用個快速冪加個速來確保不會 TLE
+
+--------------------------------
+
+要處理多項式乘法，當然就是 fft 啦！什麼？你不懂為什麼？去看 CLRS 吧，寫得非常好~大推
+（正確來講是 dft，但使用 fft 來達到 O(nlgn) 的時間）
+
+話說我發現 fft 的執行時間竟然受 bit-reverse-copy 的實作好壞影響非常大。
+寫得好或不好（都是 O(nlgN) 的說），在這題可以差到 1s 以上（執行時間的 1/3 以上）。
+底下的 rev_bit 是出自大神 `morris <http://morris821028.github.io/>`_ 的 code。
+基本想法是反轉 32 個 bit，再平移到正確位置。接近 O(1) 的時間。
+
+快速冪部份 ans 的初使值是多項式的單位元素，也就是 1。乘上任何多項式都得到多項式本身。
+另外，不要用 c++ 內建的 complex，非常非常慢，直接讓你 TLE。
+這個程式碼達行時間為 1.8s ~ 2s 左右，在所有用 fft 解這題的程式中應該算不錯了。
+
+************************
+AC Code
+************************
 
 .. code-block:: cpp
     :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
 
     typedef unsigned int ui;
     typedef long double ldb;
@@ -58,7 +117,7 @@ FFT
     	return x >> (32 - len);
     }
 
-    // flag = -1 if ifft else +1
+     // flag = -1 if ifft else +1
     void fft(vector<Complex>& a, int flag = +1) {
         int n = a.size(); // n should be power of 2
 
@@ -113,7 +172,7 @@ FFT
         vector<int> c;
         for(int i = 0; i < nn; i++) {
             int val = int(fa[i].real + 0.5);
-            if (val) {
+            if(val) {
                 while(int(c.size()) <= i)
                     c.push_back(0);
                 c[i] = 1;
@@ -123,6 +182,33 @@ FFT
         return c;
     }
 
-************************
-模板驗證
-************************
+    int main() {
+        int N, K;
+        scanf("%d %d", &N, &K);
+
+        vector<int> a;
+        for (int i = 0; i < N; i++) {
+            int inp; scanf("%d", &inp);
+            while (int(a.size()) <= inp)
+                a.push_back(0);
+            a[inp] = 1;
+        }
+
+        // a^k
+        vector<int> ans(1, 1); // identity of polynomials
+        vector<int> base(a);
+        while (K) {
+            if (K & 1) ans = mul(ans, base);
+            K >>= 1;
+            base = mul(base, base);
+        }
+
+        for (int i = 0; i < int(ans.size()); i++) {
+            if (ans[i] > 0) {
+                printf("%d ", i);
+            }
+        }
+        puts("");
+
+        return 0;
+    }
