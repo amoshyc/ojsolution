@@ -41,7 +41,7 @@ Specification
 dp 這樣設了之後，轉移方程式就好寫了，直接看 code 吧。
 
 ************************
-AC Code 1
+AC Code
 ************************
 
 .. code-block:: cpp

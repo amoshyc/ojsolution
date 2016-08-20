@@ -19,9 +19,9 @@ POJ
     p3171.rst
     p3233.rst
     p3258.rst
-    p3273.rst
     p3254.rst
     p3264.rst
+    p3273.rst
     p3321.rst
     p3368.rst
     p3420.rst

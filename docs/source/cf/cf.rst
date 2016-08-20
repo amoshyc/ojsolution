@@ -11,6 +11,7 @@ CF
     Educational Round #7 <cfedu7/index.rst>
     Educational Round #6 <cfedu6/index.rst>
 
+    Regular Round #368 <cf368/index.rst>
     Regular Round #367 <cf367/index.rst>
     Regular Round #354 <cf354/index.rst>
     Regular Round #353 <cf353/index.rst>
