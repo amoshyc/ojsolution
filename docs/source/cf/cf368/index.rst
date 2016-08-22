@@ -10,3 +10,4 @@
     pa.rst
     pb.rst
     pc.rst
+    pd.rst

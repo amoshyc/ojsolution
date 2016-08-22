@@ -29,6 +29,7 @@ Technique
 - mod_inverse
 - tag_min_vertex_cover
 - tag_pigeonhole
+- tag_offline
 
 ************************
 Data Structure
