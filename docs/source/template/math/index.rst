@@ -10,4 +10,5 @@ Math
     fft.rst
     build_primes.rst
     extgcd.rst
+    crt.rst
     combinations.rst

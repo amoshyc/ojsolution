@@ -14,6 +14,7 @@
     other/other
     template/template
     tags
+    cheatsheet
 
 --------------------
 

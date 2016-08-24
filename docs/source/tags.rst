@@ -18,15 +18,12 @@ Technique
 - tag_suffix
 - tag_two_pointers
 - tag_constructive_algorithm
-- tag_fast_pow
 - tag_preprocess
 - tag_huffman
 - tag_implementation
-- tag_extgcd
 - tag_half_enum
 - tag_bitmask
 - tag_combination
-- mod_inverse
 - tag_min_vertex_cover
 - tag_pigeonhole
 - tag_offline
@@ -75,10 +72,19 @@ Graph
 - tag_connected_component
 
 ************************
+Math
+************************
+
+- tag_fast_pow
+- tag_extgcd
+- tag_mod_inv
+- tag_crt
+- tag_prime
+- tag_fft
+
+************************
 Other
 ************************
 
 - tag_easy
 - tag_template
-- tag_prime
-- tag_fft
