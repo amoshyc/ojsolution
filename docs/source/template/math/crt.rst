@@ -140,7 +140,7 @@ Chinese Remainder Theorem 中國剩餘定理
     m_1 k_1 + r_1 &= m_2 k_2 + r_2 \\
     m_1 k_1 &= m_2 k_2 + (r_2 - r_1)
 
-把 :math:`m_1, m_2` 的公因數除掉，讓 :math:`m_1, m_2` 互質
+把 :math:`m_1, m_2` 的公因數除掉，讓 :math:`m_1/, m_2/g` 互質
 
 .. math::
 
