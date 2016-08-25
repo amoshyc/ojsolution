@@ -5,6 +5,7 @@ CF
 .. toctree::
     :maxdepth: 2
 
+    Eduactional Round #16 <cfedu16/index.rst>
     Eduactional Round #12 <cfedu12/index.rst>
     Eduactional Round #9 <cfedu9/index.rst>
     Educational Round #8 <cfedu8/index.rst>
