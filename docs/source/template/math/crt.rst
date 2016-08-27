@@ -1,5 +1,5 @@
 ###################################################
-Chinese Remainder Theorem 中國剩餘定理
+Chinese Remainder Theorem
 ###################################################
 
 .. sidebar:: Tags
@@ -140,7 +140,7 @@ Chinese Remainder Theorem 中國剩餘定理
     m_1 k_1 + r_1 &= m_2 k_2 + r_2 \\
     m_1 k_1 &= m_2 k_2 + (r_2 - r_1)
 
-把 :math:`m_1, m_2` 的公因數除掉，讓 :math:`m_1/, m_2/g` 互質
+把 :math:`m_1, m_2` 的公因數除掉，讓 :math:`m_1/g,\, m_2/g` 互質
 
 .. math::
 
@@ -148,7 +148,7 @@ Chinese Remainder Theorem 中國剩餘定理
     \frac{ m_1 k_1}{ g } &= \frac{ m_2 k_2 }{ g } + \frac{ r2 - r1 }{ g } \\[1ex]
     \frac{ m_1 }{ g } k_1 &\equiv \frac{ r2 - r1 }{ g } \pmod { \frac{ m_2 }{ g } }
 
-明顯地，如果 :math:`\frac{r2 - r1}{g}` 不為整數則無解
+明顯地，如果 :math:`\frac{r2 - r1}{g}` 不為整數則無解。利用模反元素，可得
 
 .. math::
 
