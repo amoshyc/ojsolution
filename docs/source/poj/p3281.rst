@@ -1,0 +1,198 @@
+#####################################
+[POJ] 3281. Dining
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_max_flow``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=3281>`_
+******************************************************
+
+有 N 頭牛，F 種食物，D 種飲料。給定每隻牛喜好的食物與飲料（可能不只一種）
+每種食物、每種飲料都只能分配給一頭牛。請問，在最優的分配下，
+最多有多少隻牛能吃到牠喜好的食物、且喝到她喜好的飲料。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 100
+    1 <= F <= 100
+    1 <= D <= 100
+
+************************
+分析
+************************
+
+.. note:: 最大流經典題
+
+圖解簡單易懂，假設 input 是
+
+=====  ======  =======
+牛     食物     飲料
+=====  ======  =======
+1      {1, 2}  {2, 3}
+2      {1, 3}  {1, 4}
+3      {2, 3}  {1}
+4      {2}     {3}
+=====  ======  =======
+
+※ 所有邊的容量都是 1。
+
+.. image:: http://i.imgur.com/hkRDu4q.png
+
+這個網路的最大流即為答案。
+
+注意，牛 i -> 牛 i 的那幾條邊是必要的，這些邊保證了每隻牛只會有一單位的流量。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    using namespace std;
+
+    // ===== Declaration of DinicGraph =====
+    struct Edge {
+        int to, cap, rev;
+    };
+    struct DinicGraph {
+        const static int INF = 0x3f3f3f3f;
+        int V;
+        vector< vector<Edge> > g;
+        vector<int> iter;
+        vector<int> level;
+        DinicGraph();
+        DinicGraph(int v);
+        void add_edge(int u, int v, int cap);
+        void bfs(int s);
+        int dfs(int v, int t, int f);
+        int max_flow(int s, int t);
+    };
+    // ===== end of Declaration =====
+
+
+    DinicGraph g;
+
+    int main() {
+        // 牛 : Food => [0, N)
+        // 牛 : Drink => [N, 2 * N)
+        // Food i => [2 * N, 2 * N + F)
+        // Drink i => [2 * N + F, 2 * N + F + D)
+
+        int N, F, D;
+        scanf("%d %d %d", &N, &F, &D);
+
+        g = DinicGraph(2 * N + F + D + 2);
+
+        for (int i = 0; i < N; i++) {
+            int f_i, d_i;
+            scanf("%d %d", &f_i, &d_i);
+
+            for (int j = 0; j < f_i; j++) {
+                int f; scanf("%d", &f); f--;
+                g.add_edge(2 * N + f, i, 1);
+            }
+
+            g.add_edge(i, N + i, 1);
+
+            for (int j = 0; j < d_i; j++) {
+                int d; scanf("%d", &d); d--;
+                g.add_edge(N + i, 2 * N + F + d, 1);
+            }
+        }
+
+        int s_super = 2 * N + F + D;
+        int t_super = 2 * N + F + D + 1;
+        for (int i = 0; i < F; i++) {
+            g.add_edge(s_super, 2 * N + i, 1);
+        }
+        for (int i = 0; i < D; i++) {
+            g.add_edge(2 * N + F + i, t_super, 1);
+        }
+
+        printf("%d\n", g.max_flow(s_super, t_super));
+
+        return 0;
+    }
+
+    // ===== Implementation of DinicGraph =====
+    DinicGraph::DinicGraph() {
+        ;
+    }
+
+    DinicGraph::DinicGraph(int v): V(v) {
+        g = vector< vector<Edge> >(V, vector<Edge>());
+        iter = vector<int>(V, 0);
+        level = vector<int>(V, 0);
+    }
+
+    void DinicGraph::add_edge(int u, int v, int cap) {
+        g[u].push_back((Edge){v, cap, (int)g[v].size()});
+        g[v].push_back((Edge){u, 0, (int)g[u].size() - 1});
+    }
+
+    void DinicGraph::bfs(int s) {
+        fill(level.begin(), level.end(), -1);
+        queue<int> q;
+
+        level[s] = 0;
+        q.push(s);
+
+        while (!q.empty()) {
+            int v = q.front(); q.pop();
+            for (size_t i = 0; i < g[v].size(); i++) {
+                const Edge& e = g[v][i];
+                if (e.cap > 0 && level[e.to] < 0) {
+                    level[e.to] = level[v] + 1;
+                    q.push(e.to);
+                }
+            }
+        }
+    }
+
+    int DinicGraph::dfs(int v, int t, int f) {
+        if (v == t) return f;
+        for (size_t i = iter[v]; i < g[v].size(); i++) {
+            Edge& e = g[v][i];
+            if (e.cap > 0 && level[v] < level[e.to]) {
+                int d = dfs(e.to, t, min(f, e.cap));
+                if (d > 0) {
+                    e.cap -= d;
+                    g[e.to][e.rev].cap += d;
+                    return d;
+                }
+            }
+        }
+        return 0;
+    }
+
+    int DinicGraph::max_flow(int s, int t) { // dinic
+        int flow = 0;
+        for (;;) {
+            bfs(s);
+            if (level[t] < 0) return flow;
+            fill(iter.begin(), iter.end(), 0);
+            int f;
+            while ((f = dfs(s, t, INF)) > 0) {
+                flow += f;
+            }
+        }
+    }
+    // ===== end of Implementation =====

@@ -17,12 +17,14 @@ POJ
     p2891.rst
     p3041.rst
     p3045.rst
+    p3057.rst
     p3171.rst
     p3233.rst
     p3258.rst
     p3254.rst
     p3264.rst
     p3273.rst
+    p3281.rst
     p3321.rst
     p3368.rst
     p3420.rst

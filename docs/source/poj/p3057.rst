@@ -1,0 +1,261 @@
+#####################################
+[POJ] 3057. Evacuation
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_bipartite_matching``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=3057>`_
+******************************************************
+
+給定一個房間的平面圖，大小為 HxW，其中
+
+    1. ``X`` 代表障礙物
+    2. ``D`` 代表門
+    3. ``.`` 代表空格，每個空格上都站有一個人
+
+現在房間失火，人們想從門逃離。人的移動速度為一秒一個格子。
+每扇門同一秒只能讓一個人通過。請問所有人逃離這個房間，時間最少要多少？
+如果有人沒辦法逃脫，請輸出 "impossilbe"。
+
+※ 這題是多筆測資
+
+=============
+Sampe Input
+=============
+::
+
+    1
+    5 5
+    XXDXX
+    X...X
+    D...X
+    X...D
+    XXXXX
+
+=============
+Sampe Output
+=============
+::
+
+    3
+
+************************
+Specification
+************************
+
+::
+
+    3 <= H, W <= 12
+
+************************
+分析
+************************
+
+.. note:: 每一扇門在每一秒都建一個節點
+
+這是邏輯腦上的例題，書上寫得很好，細節請看書，這裡只說核心觀念。
+
+如何轉成二分匹配呢？二分圖 :math:`G = (A \cup B, E)`
+考慮每一扇門，同一秒只能讓一個人通過，那我們就為每一扇門在每一秒建一個節點。
+
+點集合 :math:`A` ::
+
+    (cntD 是門的數量, cntP 是人的數量)
+    door i at time t = node (t - 1) * cntD + i
+
+其中時間最大為 HxW。
+
+點集合 :math:`B` ，每個人也建一個節點::
+
+    people j = node H * W * cntD + j
+
+對於人 j，假設他可以在 t 的時間到達門 i，那我們就在::
+
+    door i at time t
+    door i at time t + 1
+    ...
+    door i at time HxW
+
+這些節點建邊連到人 j。
+
+如果在這個圖上跑二分匹配，匹配 <door i at time t, people j> 就代表人 j 會在時間 t 時從門 i 逃脫。
+
+那如何找最短時間呢？
+考慮二分匹配的演算法，該演算法是不斷地枚舉點，從該點找增廣路。
+當我門從時間小的門的點開始枚舉，這就代表時間小的門會優先匹配。
+我們只需看看枚舉到哪個時間的門的時候，總匹配數來到 cntP，
+也是就所有人都被匹配到時，演算法就可以結束了。答案就是此時的時間。
+
+------------
+
+實作上，可以從每個門做一次 bfs，來找各個人到各個點所需的時間（即距離）
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <iostream>
+    #include <vector>
+    #include <queue>
+    #include <algorithm>
+    using namespace std;
+
+    const int INF = 0x3f3f3f3f;
+    const int MAX_H = 12;
+    const int MAX_W = 12;
+    int H, W;
+    char inp[MAX_H][MAX_W + 1];
+    vector<int> doors;
+    vector<int> people;
+    int d[MAX_H][MAX_W][MAX_H][MAX_W];
+
+    // 二分匹配
+    int V;
+    vector< vector<int> > g;
+    vector<int> match;
+    vector<bool> used;
+
+    void add_edge(int u, int v) {
+        g[u].push_back(v);
+        g[v].push_back(u);
+    }
+
+    // 回傳有無找到從 v 出發的增廣路徑
+    //（首尾都為未匹配點的交錯路徑）
+    // [待確認] 每次遞迴都找一個末匹配點 v 及匹配點 u
+    bool dfs(int v) {
+        used[v] = true;
+        for (int i = 0; i < int(g[v].size()); i++) {
+            int u = g[v][i], w = match[u];
+            // 尚未配對或可從 w 找到增廣路徑（即路徑繼續增長）
+            if (w < 0 || (!used[w] && dfs(w))) {
+                // 交錯配對
+                match[v] = u;
+                match[u] = v;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    const int dr[4] = {-1, 0, +1, 0};
+    const int dc[4] = {0, +1, 0, -1};
+
+    void bfs(int sr, int sc) {
+        queue<int> que;
+
+        d[sr][sc][sr][sc] = 0;
+        que.push(sr * W + sc);
+
+        while (!que.empty()) {
+            int val = que.front(); que.pop();
+            int r = val / W;
+            int c = val % W;
+
+            for (int i = 0; i < 4; i++) {
+                int nr = r + dr[i];
+                int nc = c + dc[i];
+                if (nr < 0 || nr >= H) continue;
+                if (nc < 0 || nc >= W) continue;
+                if (inp[nr][nc] != '.') continue;
+                if (d[sr][sc][nr][nc] != INF) continue;
+
+                d[sr][sc][nr][nc] = d[sr][sc][r][c] + 1;
+                que.push(nr * W + nc);
+            }
+        }
+    }
+
+    void solve() {
+        for (int r = 0; r < H; r++) {
+            for (int c = 0; c < W; c++) {
+                if (inp[r][c] == 'D') {
+                    doors.push_back(r * W + c);
+                    bfs(r, c);
+                }
+                if (inp[r][c] == '.') {
+                    people.push_back(r * W + c);
+                }
+            }
+        }
+
+        const int MAX_DIS = H * W;
+        int cntD = doors.size();
+        int cntP = people.size();
+
+        V = MAX_DIS * cntD + cntP;
+        g = vector< vector<int> >(V);
+        match = vector<int> (V, -1);
+        used = vector<bool> (V, false);
+
+        for (int i = 0; i < cntD; i++) {
+            int dr = doors[i] / W;
+            int dc = doors[i] % W;
+
+            for (int j = 0; j < cntP; j++) {
+                int pr = people[j] / W;
+                int pc = people[j] % W;
+
+                if (d[dr][dc][pr][pc] != INF) {
+                    for (int t = d[dr][dc][pr][pc]; t <= MAX_DIS; t++) {
+                        int door_id = (t - 1) * cntD + i;
+                        int people_id = MAX_DIS * cntD + j;
+                        add_edge(door_id, people_id);
+                    }
+                }
+            }
+        }
+
+        // bipartite matching
+        int cnt = 0;
+        fill(match.begin(), match.end(), -1);
+
+        for (int v = 0; v < MAX_DIS * cntD; v++) {
+            fill(used.begin(), used.end(), false);
+            if (match[v] == -1) {
+                if (dfs(v)) {
+                    cnt++;
+
+                    if (cnt == cntP) {
+                        printf("%d\n", v / cntD + 1);
+                        return;
+                    }
+                }
+            }
+        }
+
+        puts("impossible");
+    }
+
+    int main() {
+        int TC;
+        scanf("%d", &TC);
+
+        while (TC--) {
+            memset(d, INF, sizeof(d));
+            g.clear();
+            doors.clear();
+            people.clear();
+
+            scanf("%d %d", &H, &W);
+            for (int r = 0; r < H; r++) {
+                scanf("%s", inp[r]);
+            }
+
+            solve();
+        }
+
+        return 0;
+    }
