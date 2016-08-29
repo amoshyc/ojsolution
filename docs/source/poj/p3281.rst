@@ -157,7 +157,7 @@ AC Code
 
         while (!q.empty()) {
             int v = q.front(); q.pop();
-            for (size_t i = 0; i < g[v].size(); i++) {
+            for (int i = 0; i < int(g[v].size()); i++) {
                 const Edge& e = g[v][i];
                 if (e.cap > 0 && level[e.to] < 0) {
                     level[e.to] = level[v] + 1;
@@ -169,7 +169,7 @@ AC Code
 
     int DinicGraph::dfs(int v, int t, int f) {
         if (v == t) return f;
-        for (size_t i = iter[v]; i < g[v].size(); i++) {
+        for (int& i = iter[v]; i < int(g[v].size()); i++) {
             Edge& e = g[v][i];
             if (e.cap > 0 && level[v] < level[e.to]) {
                 int d = dfs(e.to, t, min(f, e.cap));

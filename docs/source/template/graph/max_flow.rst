@@ -189,4 +189,4 @@ Function Version
 模板驗證
 ************************
 
-`poj3281 <http://codepad.org/4b9iHEW4>`_
+`poj3281 <../../poj/p3281.html>`_
