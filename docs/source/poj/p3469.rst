@@ -1,0 +1,182 @@
+#####################################
+[POJ] 3469. Dual Core CPU
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_min_cut``
+    - ``tag_max_flow``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=3469>`_
+******************************************************
+
+有 N 個工作，與兩個 cpu A, B。
+工作 i 在 cpu A 上執行的成本為 A[i]，在 cpu B 上執行的成本為 B[i]。
+其中有 M 個限制，每個限制 (a[i], b[i], w[i]) 代表：
+如果工作 a[i], b[i] 不在同一個 cpu 上執行，要增加額外成本 w[i]
+請輸出執行所有工作所需的最小成本總和。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 2 * 10^4
+    1 <= M <= 2 * 10^5
+
+************************
+分析
+************************
+
+.. note:: 最小割經典題
+
+邏輯腦書上例題。
+
+對於每個工作 i，建立兩條單向邊::
+
+    1. cpu A -> 工作 i，權重 A[i]
+    2. 工作 i -> cpu B，權重 B[i]
+
+對於每個限制 <a[i], b[i], w[i]>，建立雙向邊::
+
+    a[i] <-> b[i]，權重 w[i]
+
+-------------------
+
+這個圖的每一種 cut，都對應一種分配方式。
+假設其中一條切掉的邊為 <工作 2, B>，這代表工作 2 會在 cpu B 上執行。
+這個圖的最小割即為答案，而最小割可以用最大流 (cpu A -> cpuB) 求得。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    #include <queue>
+    using namespace std;
+
+    // ===== Declaration of DinicGraph =====
+    struct Edge {
+        int to, cap, rev;
+    };
+    struct DinicGraph {
+        const static int INF = 0x3f3f3f3f;
+        int V;
+        vector< vector<Edge> > g;
+        vector<int> iter;
+        vector<int> level;
+        DinicGraph();
+        DinicGraph(int v);
+        void add_edge(int u, int v, int cap);
+        void bfs(int s);
+        int dfs(int v, int t, int f);
+        int max_flow(int s, int t);
+    };
+    // ===== end of Declaration =====
+
+    DinicGraph g;
+
+    int main() {
+        int N, M;
+        scanf("%d %d", &N, &M);
+
+        g = DinicGraph(N + 2);
+
+        int A = N;
+        int B = N + 1;
+
+        for (int i = 0; i < N; i++) {
+            int a, b; scanf("%d %d", &a, &b);
+            g.add_edge(A, i, a);
+            g.add_edge(i, B, b);
+        }
+        for (int i = 0; i < M; i++) {
+            int a, b, w;
+            scanf("%d %d %d", &a, &b, &w);
+            a--; b--;
+            g.add_edge(a, b, w);
+            g.add_edge(b, a, w);
+        }
+
+        printf("%d\n", g.max_flow(A, B));
+
+        return 0;
+    }
+
+    // ===== Implementation of DinicGraph =====
+    DinicGraph::DinicGraph() {
+        ;
+    }
+
+    DinicGraph::DinicGraph(int v): V(v) {
+        g = vector< vector<Edge> >(V, vector<Edge>());
+        iter = vector<int>(V, 0);
+        level = vector<int>(V, 0);
+    }
+
+    void DinicGraph::add_edge(int u, int v, int cap) {
+        g[u].push_back((Edge){v, cap, (int)g[v].size()});
+        g[v].push_back((Edge){u, 0, (int)g[u].size() - 1});
+    }
+
+    void DinicGraph::bfs(int s) {
+        fill(level.begin(), level.end(), -1);
+        queue<int> q;
+
+        level[s] = 0;
+        q.push(s);
+
+        while (!q.empty()) {
+            int v = q.front(); q.pop();
+            for (int i = 0; i < int(g[v].size()); i++) {
+                const Edge& e = g[v][i];
+                if (e.cap > 0 && level[e.to] < 0) {
+                    level[e.to] = level[v] + 1;
+                    q.push(e.to);
+                }
+            }
+        }
+    }
+
+    int DinicGraph::dfs(int v, int t, int f) {
+        if (v == t) return f;
+        for (int& i = iter[v]; i < int(g[v].size()); i++) {
+            Edge& e = g[v][i];
+            if (e.cap > 0 && level[v] < level[e.to]) {
+                int d = dfs(e.to, t, min(f, e.cap));
+                if (d > 0) {
+                    e.cap -= d;
+                    g[e.to][e.rev].cap += d;
+                    return d;
+                }
+            }
+        }
+        return 0;
+    }
+
+    int DinicGraph::max_flow(int s, int t) { // dinic
+        int flow = 0;
+        for (;;) {
+            bfs(s);
+            if (level[t] < 0) return flow;
+            fill(iter.begin(), iter.end(), 0);
+            int f;
+            while ((f = dfs(s, t, INF)) > 0) {
+                flow += f;
+            }
+        }
+    }
+    // ===== end of Implementation =====

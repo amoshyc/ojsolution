@@ -1,0 +1,179 @@
+#####################################
+[POJ] 2135. Farm Tour
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_min_cost_flow``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=2135>`_
+******************************************************
+
+給定一個 N 個節點，M 條邊 (權重為 c[i]) 的有向圖，
+請問從節點 1 前往 節點 N 並返回的最短路徑長為多少？
+其中，去程與回程不能經過相同邊。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 10^3
+    1 <= M <= 10^4
+    1 <= c[i] <= 35000
+
+************************
+分析
+************************
+
+.. note:: 最小費用流經典題
+
+邏輯腦書上例題。
+
+如果嘗試從節點 1 跑一次 dijkstra，把通過的邊刪除，
+再從節點 N 跑一次 dijkstra，這樣得到的答案是錯的。
+題目所給的 Sample Input 就是一個反例。
+
+-----------------------
+
+轉為費用流，網路的節點與給定的有向圖相同。
+對於每條邊 <a[i], b[i], c[i]>，轉成::
+
+    節點 a[i] -> 節點 b[i]，容量為 1，成本為 c[i]
+
+這樣跑最小費用流（節點 1 -> 節點 N，流量為 2）所得的成本即為所求。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cmath>
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <iostream>
+    #include <algorithm>
+    #include <functional>
+    #include <vector>
+    #include <queue>
+    using namespace std;
+
+    // ===== Declaration of MinCostFlow =====
+    typedef long long ll;
+    typedef pair<ll, int> P; // for spfa
+    struct Edge {
+        int to, cap; ll cost; int rev;
+    };
+    struct MinCostFlow {
+        static ll INF;
+        int V;
+        vector< vector<Edge> > g;
+        vector<int> prevv;
+        vector<int> preve;
+        // vector<int> match;
+        MinCostFlow();
+        MinCostFlow(int v);
+        void add_edge(int u, int v, int cap, ll cost);
+        ll min_cost_flow(int s, int t, int f);
+    };
+    // ===== end of Declaration =====
+
+    MinCostFlow g;
+
+    int main() {
+        int N, M;
+        scanf("%d %d", &N, &M);
+
+        g = MinCostFlow(N);
+
+        while (M--) {
+            int u, v; ll w;
+            scanf("%d %d %lld", &u, &v, &w);
+            u--; v--;
+            g.add_edge(u, v, 1, w);
+            g.add_edge(v, u, 1, w);
+        }
+
+        printf("%lld\n", g.min_cost_flow(0, N - 1, 2));
+
+        return 0;
+    }
+
+    // ===== Implementation of DinicGraph =====
+    ll MinCostFlow::INF = 1e18;
+    MinCostFlow::MinCostFlow() {;}
+    MinCostFlow::MinCostFlow(int v): V(v) {
+        g = vector< vector<Edge> >(V);
+        prevv = vector<int>(V, -1);
+        preve = vector<int>(V, -1);
+        // match = vector<int>(V, -1);
+    }
+
+    void MinCostFlow::add_edge(int u, int v, int cap, ll cost) {
+        g[u].push_back((Edge) {v, cap, cost, int(g[v].size())});
+        g[v].push_back((Edge) {u, 0, -cost, int(g[u].size() - 1)});
+    }
+
+    ll MinCostFlow::min_cost_flow(int s, int t, int f) {
+        ll res = 0;
+        vector<ll> h(V, 0);
+        vector<ll> d(V, INF);
+
+        while (f > 0) {
+            fill(d.begin(), d.end(), INF);
+            priority_queue< P, vector<P>, greater<P> > pq;
+
+            d[s] = 0;
+            pq.push(P(d[s], s));
+
+            while (!pq.empty()) {
+                P p = pq.top(); pq.pop();
+                int v = p.second;
+                if (d[v] < p.first) continue;
+                for (int i = 0; i < int(g[v].size()); i++) {
+                    const Edge& e = g[v][i];
+                    if (e.cap > 0 && d[e.to] > d[v] + e.cost + h[v] - h[e.to]) {
+                        d[e.to] = d[v] + e.cost + h[v] - h[e.to];
+                        prevv[e.to] = v;
+                        preve[e.to] = i;
+                        pq.push(P(d[e.to], e.to));
+                    }
+                }
+            }
+
+            if (d[t] == INF)
+                return -1;
+
+            for (int v = 0; v < V; v++)
+                h[v] += d[v];
+
+            int bn = f;
+            for (int v = t; v != s; v = prevv[v])
+                bn = min(bn, g[prevv[v]][preve[v]].cap);
+
+            // // find match
+            // for (int v = prevv[t]; v != s; v = prevv[prevv[v]]) {
+            //     int u = prevv[v];
+            //     match[v] = u;
+            //     match[u] = v;
+            // }
+
+            f -= bn;
+            res += bn * h[t];
+            for (int v = t; v != s; v = prevv[v]) {
+                Edge& e = g[prevv[v]][preve[v]];
+                e.cap -= bn;
+                g[v][e.rev].cap += bn;
+            }
+        }
+        return res;
+    }
+    // ===== end of Implementation =====
