@@ -3,7 +3,7 @@ CF
 ########################
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     Eduactional Round #16 <cfedu16/index.rst>
     Eduactional Round #12 <cfedu12/index.rst>
@@ -12,6 +12,7 @@ CF
     Educational Round #7 <cfedu7/index.rst>
     Educational Round #6 <cfedu6/index.rst>
 
+    Regular Round #369 <cf369/index.rst>
     Regular Round #368 <cf368/index.rst>
     Regular Round #367 <cf367/index.rst>
     Regular Round #354 <cf354/index.rst>
