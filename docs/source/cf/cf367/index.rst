@@ -11,3 +11,4 @@
     pb.rst
     pc.rst
     pd.rst
+    pe.rst

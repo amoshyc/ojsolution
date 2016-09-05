@@ -43,6 +43,7 @@ Data Structure
 - tag_map
 - tag_sparse_table
 - tag_trie
+- tag_linkedlist
 
 ************************
 String
