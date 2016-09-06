@@ -1,0 +1,190 @@
+#####################################
+[UVA] 1449. Dominating Patterns
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_ac_automaton``
+
+.. contents:: TOC
+    :depth: 2
+
+*********************************************************************
+`題目 <https://uva.onlinejudge.org/external/14/1449.pdf>`_
+*********************************************************************
+
+多筆測資，每筆測資給定 N 個 pattern 字串，與一個文本 T。
+求哪一個 pattern 在文本中出現最多次？該次數為何？
+若有多個 pattern 有相同的最多次，請依輸入順序輸出。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 150
+    1 <= |pattern[i]| <= 70
+    1 <= |T| <= 10^6
+
+************************
+分析
+************************
+
+.. note:: AC 自動機模版題
+
+AC Automaton 模版題，Trie 這種東西寫法變化太大，還是不要寫成 structure 的型式比較好。
+
+************************
+AC Code 1
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    const int KK = 26;
+
+    struct Node {
+        int val;
+        int cnt;
+        Node* fail;
+        Node* nxt[KK];
+        Node() {
+            val = -1;
+            cnt = 0;
+            fail = nullptr;
+            fill(nxt, nxt + KK, nullptr);
+        }
+    };
+
+    int NN;
+    Node data[150 * 70 + 100];
+
+    void build(Node* root) {
+        queue<Node*> que;
+
+        root->fail = nullptr;
+        que.push(root);
+
+        while (!que.empty()) {
+            Node* r = que.front(); que.pop();
+
+            for (int t = 0; t < KK; t++) {
+                Node* u = r->nxt[t];
+                if (u == nullptr)
+                    continue;
+
+                // new transition t
+                // v = r.fail
+                //  ↖
+                //    r -> u = r.nxt[t]
+                // at r currently, where r->fail is known
+                // want to compute u->fail
+                // i.e. the state to go when mismatch occurs at u
+
+                Node* v = r->fail;
+                while (v != nullptr && v->nxt[t] == nullptr) {
+                    v = v->fail;
+                }
+
+                if (v == nullptr) // There's no transition available
+                    u->fail = root;
+                else // There's a transition at v
+                    u->fail = v->nxt[t];
+
+                que.push(u);
+            }
+        }
+    }
+
+    void insert(Node* root, const string& p, int val) {
+        Node* u = root;
+
+        for (const char& c : p) {
+            int t = int(c - 'a');
+            if (u->nxt[t] == nullptr) {
+                data[NN] = Node();
+                u->nxt[t] = &data[NN++];
+            }
+            u = u->nxt[t];
+        }
+
+        (u->cnt)++;
+        u->val = val;
+    }
+
+    void query(Node* root, const string& s, vector<int>& res) {
+        Node* u = root;
+
+        for (const char& c : s) {
+            int t = int(c - 'a');
+            while (u != nullptr && u->nxt[t] == nullptr) {
+                u = u->fail; // notice that only root's fail is nullptr
+            }
+
+            if (u == nullptr) { // no transition t available (including root)
+                u = root; // setting u for next char
+                continue;
+            }
+            else { // There's a transition
+                u = u->nxt[t];
+                // if there's a match at u, then check all other patterns p
+                // if there's a longest p form a match at u, too
+                // then p must be L(u)'s longest suffix
+                Node* v = u;
+                while (v != root) {
+                    if (v->cnt > 0) {
+                        res[v->val]++;
+                    }
+                    v = v->fail;
+                }
+            }
+        }
+    }
+
+    int N;
+    string patterns[150];
+    string t;
+
+    int main() {
+        ios::sync_with_stdio(false);
+        cin.tie(0);
+        cout.tie(0);
+
+        while (cin >> N) {
+            if (N == 0) break;
+
+            // init
+            NN = 0;
+            data[NN] = Node();
+            Node* ac = &data[NN++];
+
+            for (int i = 0; i < N; i++) {
+                cin >> patterns[i];
+                insert(ac, patterns[i], i);
+            }
+
+            build(ac);
+
+            cin >> t;
+            vector<int> cnt(N, 0);
+            query(ac, t, cnt);
+
+            // for (int i = 0; i < N; i++) {
+            //     cout << patterns[i] << ": " << cnt[i] << endl;
+            // }
+
+            int mx = *max_element(cnt.begin(), cnt.end());
+            cout << mx << "\n";
+            for (int i = 0; i < N; i++) {
+                if (cnt[i] == mx) {
+                    cout << patterns[i] << "\n";
+                }
+            }
+        }
+
+        return 0;
+    }
