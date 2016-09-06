@@ -50,6 +50,7 @@ String
 ************************
 
 - tag_kmp
+- tag_ac_automaton
 
 ************************
 Graph
