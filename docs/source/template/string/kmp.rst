@@ -17,56 +17,23 @@ KMP
 .. code-block:: cpp
     :linenos:
 
-    const int MAX_Np = ...;
-    int F[MAX_Np];
+    // F[i] = max len of prefix of P such that it is suffix of Pi
+    // F[i] = the 0-based index to go to if mismath occur at (i + 1)
+    //    0123456
+    // P: ababaca
+    //       ^ ^
+    //       k i
+    // F: 0012301
+    // mismatch at i=5, k=3, we should move k to F[k - 1]
+    vector<int> get_fail(const string& P) {
+        int m = P.length();
+        vector<int> F(m, 0); // F[0] = 0
 
-    void fail_func(const string& P) {
-        const int Np = P.length();
-        memset(F, 0, sizeof(F));
-        int i = 0, j = -1; F[0] = -1;
-        while (i < Np) {
-            while (j >= 0 && P[i] != P[j]) j = F[j];
-            i++; j++;
-            F[i] = j;
-        }
-    }
-
-    int KMP(const string& P, const string& S) {
-        int cnt = 0;
-        const int Np = P.length();
-        const int Ns = S.length();
-
-        failure_function(P);
-
-        int i = 0, j = 0;
-        while (i < Ns) {
-            while (j >= 0 && S[i] != P[j]) j = F[j];
-            i++; j++;
-            if (j == Np) {
-                cnt++;
-                j = F[j];
-            }
-        }
-
-        return cnt;
-    }
-
-
-Code rewritten from CLRS:
-
-.. code-block:: cpp
-    :linenos:
-
-    vector<int> get_fail(const string& s) {
-        int len = s.length();
-        vector<int> F(len, 0);
-
-        F[0] = 0;
-        int k = 0; // candidate len
-        for (int i = 1; i < len; i++) {
-            while (k > 0 && s[k] != s[i])
-                k = F[k - 1]; // since we're 0-based
-            if (s[k] == s[i])
+        int k = 0; // 0-based index of 1st pointer
+        for (int i = 1; i < m; i++) { // 0-based index of 2nd pointer
+            while (k > 0 && P[k] != P[i]) // mismatch at k, i
+                k = F[k - 1];
+            if (P[k] == P[i])
                 k++;
             F[i] = k;
         }
@@ -74,8 +41,40 @@ Code rewritten from CLRS:
         return F;
     }
 
+    //            i
+    //            v
+    //    0123456789ABCDE
+    // S: bacbababaabcbab
+    // P:    ababaca
+    //       0123456
+    //            ^
+    //            q
+    // F:    0012301
+    // mismatch occurs at i=8, q=5, we should move q to F[q - 1]
+
+    int KMP(const string& S, const string& P) {
+        int n = S.length();
+        int m = P.length();
+        vector<int> F = get_fail(P);
+
+        int cnt = 0;
+        int q = 0; // 0-based index on P
+        for (int i = 0; i < n; i++) { // 0-based index on S
+            while (q > 0 && P[q] != S[i]) // find transition P[q]
+                q = F[q - 1];
+            if (P[q] == S[i]) // found
+                q++;
+            if (q == m) { // match at (i - m + 1)
+                cnt++;
+                q = F[q - 1];
+            }
+        }
+
+        return cnt;
+    }
+
 ************************
 模板驗證
 ************************
 
-`poj3468 <http://codepad.org/faJWOZW4>`_
+`poj3461 <http://codepad.org/wCW8ycvu>`_
