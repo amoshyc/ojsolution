@@ -1,0 +1,100 @@
+#####################################
+[UVA] 684. Integral Determinant
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_gaussian``
+
+.. contents:: TOC
+    :depth: 2
+
+*********************************************************************
+`題目 <https://uva.onlinejudge.org/external/6/684.pdf>`_
+*********************************************************************
+
+多筆測資。每筆測資給定一個 NxN 的矩陣，請輸出該矩陣的 determinant。
+矩陣的每一項都是整數，所以 determinant 也是整數。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 30
+
+************************
+分析
+************************
+
+.. note:: AC 自動機模版題
+
+用 Gaussian elimination （不是 Gaussian-Jordan elimination）把矩陣上三角化。
+主對角線的項的乘積即為答案。這題不能用浮點數，所以使用 gcd 的想法改寫 Gaussian elimination。
+教學請參 `<http://blog.csdn.net/zhoufenqin/article/details/7779707>`_
+
+************************
+AC Code 1
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    typedef long long ll;
+    typedef vector<ll> vec;
+    typedef vector<vec> mat;
+
+    ll determinant(mat m) { // square matrix
+        const int n = m.size();
+        ll det = 1;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int a = i, b = j;
+                while (m[b][i]) {
+                    ll q = m[a][i] / m[b][i];
+                    for (int k = 0; k < n; k++)
+                        m[a][k] = m[a][k] - m[b][k] * q;
+                    swap(a, b);
+                }
+
+                if (a != i) {
+                    for (int k = 0; k < n; k++)
+                        swap(m[i][k], m[j][k]);
+                    det = -det;
+                }
+            }
+
+            if (m[i][i] == 0)
+                return 0;
+            else
+                det *= m[i][i];
+        }
+        return det;
+    }
+
+    int main() {
+        ios::sync_with_stdio(false);
+        cin.tie(0);
+
+        int N;
+        while (cin >> N) {
+            if (N == 0) break;
+
+            mat m(N, vec(N, 0));
+            for (int r = 0; r < N; r++) {
+                for (int c = 0; c < N; c++) {
+                    cin >> m[r][c];
+                }
+            }
+
+            cout << determinant(m) << endl;
+        }
+
+        cout << "*" << endl;
+
+        return 0;
+    }

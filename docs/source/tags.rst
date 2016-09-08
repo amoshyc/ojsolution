@@ -84,6 +84,8 @@ Math
 - tag_crt
 - tag_prime
 - tag_fft
+- tag_gaussian
+- tag_gaussian_jordan
 
 ************************
 Other
