@@ -7,6 +7,7 @@ Math
 
     fast_pow.rst
     fast_pow_matrix.rst
+    matrix_det.rst
     fft.rst
     build_primes.rst
     extgcd.rst
