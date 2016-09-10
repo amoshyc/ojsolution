@@ -6,6 +6,7 @@ POJ
     :maxdepth: 1
 
     p1308.rst
+    p1442.rst
     p1769.rst
     p1984.rst
     p1988.rst
@@ -21,8 +22,8 @@ POJ
     p3057.rst
     p3171.rst
     p3233.rst
-    p3258.rst
     p3254.rst
+    p3258.rst
     p3264.rst
     p3273.rst
     p3281.rst

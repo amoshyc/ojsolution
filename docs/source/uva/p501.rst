@@ -1,0 +1,154 @@
+#####################################
+[UVA] 501. Black Box
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_treap``
+
+.. contents:: TOC
+    :depth: 2
+
+*********************************************************************
+`題目 <https://uva.onlinejudge.org/external/5/501.pdf>`_
+*********************************************************************
+
+************************
+Specification
+************************
+
+::
+
+    1 <= M, N <= 30000
+
+************************
+分析
+************************
+
+.. note:: Treap 模版題
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    // remember srand(time(NULL)), cannot use on poj(g++)
+    struct Treap { // val: bst, pri: heap
+        int pri, size, val, id;
+        Treap *lch, *rch;
+        Treap() {}
+        Treap(int v) : pri(rand()), size(1), val(v), lch(NULL), rch(NULL) {}
+    };
+
+    inline int size(Treap* t) {
+        return (t ? t->size : 0);
+    }
+    inline void pull(Treap* t) {
+        t->size = 1 + size(t->lch) + size(t->rch);
+    }
+
+    int NN = 0;
+    Treap pool[30000];
+
+    Treap* merge(Treap* a, Treap* b) {
+        if (!a || !b) return (a ? a : b);
+        if (a->pri > b->pri) {
+            a->rch = merge(a->rch, b);
+            pull(a);
+            return a;
+        }
+        else {
+            b->lch = merge(a, b->lch);
+            pull(b);
+            return b;
+        }
+    }
+
+    // size(a) will be k
+    // t is unable to use afterwards
+    void split(Treap* t, int k, Treap*& a, Treap*& b) {
+        if (!t) { a = b = NULL; return; }
+        if (size(t->lch) < k) {
+            a = t;
+            split(t->rch, k - size(t->lch) - 1, a->rch, b);
+            pull(a);
+        }
+        else {
+            b = t;
+            split(t->lch, k, a, b->lch);
+            pull(b);
+        }
+    }
+
+    // get the rank of val
+    // result is 1-based
+    int get_rank(Treap* t, int val) {
+        if (!t) return 0;
+        if (val < t->val)
+            return get_rank(t->lch, val);
+        else
+            return get_rank(t->rch, val) + size(t->lch) + 1;
+    }
+
+    // get kth smallest item
+    // k is 1-based
+    Treap* get_kth(Treap*& t, int k) {
+        Treap *a, *b, *c, *d;
+        split(t, k - 1, a, b);
+        split(b, 1, c, d);
+        t = merge(a, merge(c, d));
+        return c;
+    }
+
+    void insert(Treap*& t, int val) {
+        int k = get_rank(t, val);
+        Treap *a, *b;
+        split(t, k, a, b);
+        pool[NN] = Treap(val);
+        Treap* n = &pool[NN++];
+        t = merge(merge(a, n), b);
+    }
+
+    int M, N;
+    int get_idx = 0, get_k = 1;
+    int A[30000 + 10];
+    int G[30000 + 10];
+    Treap* root = NULL;
+
+    int main() {
+        srand(time(NULL));
+
+        int TC;
+        scanf("%d", &TC);
+        for (int tc = 0; tc < TC; tc++) {
+            if (tc != 0) puts("");
+
+            root = NULL;
+            NN = 0;
+            get_idx = 0;
+            get_k = 1;
+
+            scanf("%d %d", &M, &N);
+            for (int i = 0; i < M; i++)
+                scanf("%d", &A[i]);
+            for (int i = 0; i < N; i++)
+                scanf("%d", &G[i]);
+
+            for (int i = 1; i <= M; i++) {
+                insert(root, A[i - 1]);
+
+                while (get_idx < N && i == G[get_idx]) {
+                    Treap* res = get_kth(root, get_k++);
+                    printf("%d\n", res->val);
+                    get_idx++;
+                }
+            }
+        }
+
+        return 0;
+    }
