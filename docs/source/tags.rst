@@ -44,6 +44,7 @@ Data Structure
 - tag_sparse_table
 - tag_trie
 - tag_linkedlist
+- tag_treap
 
 ************************
 String

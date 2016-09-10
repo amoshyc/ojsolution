@@ -11,3 +11,4 @@ Data Structure
     bit.rst
     bit2d.rst
     trie.rst
+    treap.rst

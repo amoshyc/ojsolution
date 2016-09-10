@@ -18,6 +18,8 @@ Matrix Determinant
 求 determinant，教學請參
 `<http://blog.csdn.net/zhoufenqin/article/details/7779707>`_
 
+用 Gaussian elimination （不是 Gaussian-Jordan elimination）把矩陣上三角化，主對角線的項的乘積即為答案
+
 .. code-block:: cpp
     :linenos:
 
