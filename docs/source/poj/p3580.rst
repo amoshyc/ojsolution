@@ -1,0 +1,316 @@
+#####################################
+[POJ] 3580. SuperMemo
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_treap``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=3580>`_
+******************************************************
+
+給定一個長度為 N 的序列 A[]。請寫一個程式支援 6 種操作:
+
+1. ``ADD x y k`` : 將 A[x, y] 的每一項都加上 k
+2. ``REVERSE x y`` : 將 A[x, y] 反轉，即變成 A[x, y][::-1]
+3. ``REVOLVE x y k`` : 將 A[x, y] 右移（右旋）k 格，相當於位元上的 rotate 操作。
+4. ``INSERT x val`` : 將 val 插入到 A[x] 這一項的後面。
+5. ``DELETE x`` : 刪除 A[x] 這一項
+6. ``MIN x y`` : 輸出 A[x, y] 中的最小值
+
+操作共有 M 個。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N, M <= 10^6
+
+************************
+分析
+************************
+
+.. note:: Treap（implicit key）
+
+Treap(implicit key) 的模版題。
+再次強調，poj(g++) 不能用 srand(time(NULL))。
+底下給出 AC Code 與我寫的用來產生小測資的程式（python3）
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    // #include <bits/stdc++.h>
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    using namespace std;
+
+    // Remember srand(time(NULL)), but it cannot be used on poj(g++)
+    struct Treap { // implicit key (key = index)
+        int pri, size, val;
+        int inc, mn; bool rev;
+        Treap *lch, *rch;
+        Treap() {}
+        Treap(int v) {
+            pri = rand();
+            size = 1;
+            val = v;
+            inc = 0;
+            mn = v;
+            rev = false;
+            lch = rch = NULL;
+        }
+    };
+
+    inline int size(Treap* t) {
+        return (t ? t->size : 0);
+    }
+
+    // Notice that lch, rch may be NULL
+    // flag t->inc is set,
+    // => the subtree of t (t not included) is not up-to-date
+    // flag t->rev is set,
+    // => every node in substree of t (t not included) should
+    //    swap its 2 children
+    // Every Treap corresponds to a range in array
+    inline void push(Treap* t) {
+        if (t->rev) {
+            if (t->lch) {
+                swap(t->lch->lch, t->lch->rch);
+                t->lch->rev ^= 1;
+            }
+            if (t->rch) {
+                swap(t->rch->lch, t->rch->rch);
+                t->rch->rev ^= 1;
+            }
+            t->rev = false;
+        }
+
+        if (t->inc) {
+            if (t->lch) {
+                t->lch->val += t->inc;
+                t->lch->inc += t->inc;
+                t->lch->mn += t->inc;
+            }
+            if (t->rch) {
+                t->rch->val += t->inc;
+                t->rch->inc += t->inc;
+                t->rch->mn += t->inc;
+            }
+            t->inc = 0;
+        }
+    }
+    inline void pull(Treap* t) {
+        t->size = 1 + size(t->lch) + size(t->rch);
+
+        t->mn = t->val;
+        if (t->lch) t->mn = min(t->mn, t->lch->mn);
+        if (t->rch) t->mn = min(t->mn, t->rch->mn);
+    }
+
+    int NN = 0;
+    Treap pool[200000];
+
+    inline Treap* new_treap(int val) {
+        pool[NN] = Treap(val);
+        return &pool[NN++];
+    }
+
+    Treap* merge(Treap* a, Treap* b) {
+        if (!a || !b) return (a ? a : b);
+        if (a->pri > b->pri) {
+            push(a);
+            a->rch = merge(a->rch, b);
+            pull(a);
+            return a;
+        }
+        else {
+            push(b);
+            b->lch = merge(a, b->lch);
+            pull(b);
+            return b;
+        }
+    }
+
+    // size(a) will be k
+    // t is unable to use afterwards
+    void split(Treap* t, Treap*& a, Treap*& b, int k) {
+        if (!t) { a = b = NULL; return; }
+        push(t);
+        if (size(t->lch) < k) {
+            a = t;
+            split(t->rch, a->rch, b, k - size(t->lch) - 1);
+            pull(a);
+        }
+        else {
+            b = t;
+            split(t->lch, a, b->lch, k);
+            pull(b);
+        }
+    }
+
+    void add(Treap*& t, int x, int y, int inc) {
+        Treap *a, *b, *c, *d;
+        split(t, a, b, y); // t -> a, b
+        split(a, c, d, x - 1); // a -> c, d
+        d->inc += inc;
+        d->val += inc;
+        d->mn += inc;
+        t = merge(merge(c, d), b);
+    }
+
+    void reverse(Treap*& t, int x, int y) {
+        Treap *a, *b, *c, *d;
+        split(t, a, b, y); // t -> a, b
+        split(a, c, d, x - 1); // a -> c, d
+        swap(d->lch, d->rch);
+        d->rev ^= 1;
+        t = merge(merge(c, d), b);
+    }
+
+    void revolve(Treap*& t, int x, int y, int k) { // 右移 k 位
+        int len = y - x + 1;
+        Treap *a, *b, *c, *d;
+        split(t, a, b, y); // t -> a, b
+        split(a, c, d, x - 1); // a -> c, d
+        k = k % len;
+        Treap *e, *f;
+        split(d, e, f, len - k); // d -> e, f
+        t = merge(merge(c, merge(f, e)), b);
+    }
+
+    void insert(Treap*& t, int x, int val) {
+        Treap *a, *b;
+        split(t, a, b, x);
+        t = merge(merge(a, new_treap(val)), b);
+    }
+
+    void remove(Treap*& t, int x) {
+        Treap *a, *b, *c, *d;
+        split(t, a, b, x - 1); // t -> a, b
+        split(b, c, d, 1); // b -> c, d
+        t = merge(a, d);
+    }
+
+    int get_min(Treap*& t, int x, int y) {
+        Treap *a, *b, *c, *d;
+        split(t, a, b, y); // t -> a, b
+        split(a, c, d, x - 1); // a -> c, d
+        int ans = d->mn;
+        t = merge(merge(c, d), b);
+        return ans;
+    }
+
+    int N, M;
+    Treap* root = NULL;
+
+    int main() {
+        // srand(time(NULL));
+        // srand(10111);
+
+        scanf("%d", &N);
+        for (int i = 0; i < N; i++) {
+            int val;
+            scanf("%d", &val);
+            root = merge(root, new_treap(val)); // implicit key(index)
+        }
+
+        scanf("%d", &M);
+        while (M--) {
+            char cmd[10];
+            scanf("%s", cmd);
+
+            if (cmd[0] == 'A') {
+                int x, y, val; scanf("%d %d %d", &x, &y, &val);
+                add(root, x, y, val);
+            }
+            if (cmd[0] == 'R' && cmd[3] == 'E') {
+                int x, y; scanf("%d %d", &x, &y);
+                reverse(root, x, y);
+            }
+            if (cmd[0] == 'R' && cmd[3] == 'O') {
+                int x, y, k; scanf("%d %d %d", &x, &y, &k);
+                revolve(root, x, y, k);
+            }
+            if (cmd[0] == 'I') {
+                int x, val; scanf("%d %d", &x, &val);
+                insert(root, x, val);
+            }
+            if (cmd[0] == 'D') {
+                int x; scanf("%d", &x);
+                remove(root, x);
+            }
+            if (cmd[0] == 'M') {
+                int x, y; scanf("%d %d", &x, &y);
+                printf("%d\n", get_min(root, x, y));
+            }
+        }
+
+        return 0;
+    }
+
+
+************************
+測資產生程式 (python 3)
+************************
+
+.. code-block:: python
+    :linenos:
+
+    from random import randint, choice
+
+    N = 5
+    M = 5
+
+    A = [randint(1, 10) for _ in range(N)]
+    print(N)
+    print(' '.join(map(str, A)))
+
+    cmds = ['ADD', 'REVERSE', 'REVOLVE', 'INSERT', 'DELETE', 'MIN']
+
+    print(M)
+    for _ in range(M - 1):
+        cmd = choice(cmds)
+
+        if cmd == 'ADD':
+            x = randint(1, N)
+            y = randint(x, N)
+            k = randint(1, 3)
+            print(cmd, x, y, k)
+        if cmd == 'REVERSE':
+            x = randint(1, N)
+            y = randint(x, N)
+            print(cmd, x, y)
+        if cmd == 'REVOLVE':
+            x = randint(1, N)
+            y = randint(x, N)
+            k = randint(1, (y - x + 1))
+            print(cmd, x, y, k)
+        if cmd == 'INSERT':
+            x = randint(1, N)
+            val = randint(0, 10)
+            print(cmd, x, val)
+        if cmd == 'DELETE':
+            x = randint(1, N)
+            print(cmd, x)
+            N -= 1
+        if cmd == 'MIN':
+            x = randint(1, N)
+            y = randint(x, N)
+            print(cmd, x, y)
+
+    print('MIN 1 {}'.format(N))

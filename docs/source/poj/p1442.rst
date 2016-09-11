@@ -31,7 +31,7 @@ Specification
 
 ---------------------
 
-被坑得好慘…poj 的 g++ 竟然不能用 srand 的樣子，一用就 RE…
+被坑得好慘…poj 的 g++ 竟然不能用 srand(time(NULL)) 的樣子，一用就 RE…
 找這個問題找好久…還好有發現 uva 501，測過後確定不是 Treap 的問題，才慢慢找到這個 bug…
 
 ************************
@@ -41,7 +41,12 @@ AC Code
 .. code-block:: cpp
     :linenos:
 
-    #include <bits/stdc++.h>
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
     using namespace std;
 
     // remember srand(time(NULL)), cannot use on poj(g++)
@@ -49,7 +54,12 @@ AC Code
         int pri, size, val, id;
         Treap *lch, *rch;
         Treap() {}
-        Treap(int v) : pri(rand()), size(1), val(v), lch(NULL), rch(NULL) {}
+        Treap(int v) {
+            pri = rand();
+            size = 1;
+            val = v;
+            lch = rch = NULL;
+        }
     };
 
     inline int size(Treap* t) {
@@ -76,18 +86,16 @@ AC Code
         }
     }
 
-    // size(a) will be k
-    // t is unable to use afterwards
-    void split(Treap* t, int k, Treap*& a, Treap*& b) {
+    void split(Treap* t, Treap*& a, Treap*& b, int k) {
         if (!t) { a = b = NULL; return; }
         if (size(t->lch) < k) {
             a = t;
-            split(t->rch, k - size(t->lch) - 1, a->rch, b);
+            split(t->rch, a->rch, b, k - size(t->lch) - 1);
             pull(a);
         }
         else {
             b = t;
-            split(t->lch, k, a, b->lch);
+            split(t->lch, a, b->lch, k);
             pull(b);
         }
     }
@@ -106,8 +114,8 @@ AC Code
     // k is 1-based
     Treap* get_kth(Treap*& t, int k) {
         Treap *a, *b, *c, *d;
-        split(t, k - 1, a, b);
-        split(b, 1, c, d);
+        split(t, a, b, k - 1);
+        split(b, c, d, 1);
         t = merge(a, merge(c, d));
         return c;
     }
@@ -115,7 +123,7 @@ AC Code
     void insert(Treap*& t, int val) {
         int k = get_rank(t, val);
         Treap *a, *b;
-        split(t, k, a, b);
+        split(t, a, b, k);
         pool[NN] = Treap(val);
         Treap* n = &pool[NN++];
         t = merge(merge(a, n), b);
@@ -128,32 +136,26 @@ AC Code
     Treap* root = NULL;
 
     int main() {
-        srand(time(NULL));
+        // srand(time(NULL));
 
-        int TC;
-        scanf("%d", &TC);
-        for (int tc = 0; tc < TC; tc++) {
-            if (tc != 0) puts("");
+        root = NULL;
+        NN = 0;
+        get_idx = 0;
+        get_k = 1;
 
-            root = NULL;
-            NN = 0;
-            get_idx = 0;
-            get_k = 1;
+        scanf("%d %d", &M, &N);
+        for (int i = 0; i < M; i++)
+            scanf("%d", &A[i]);
+        for (int i = 0; i < N; i++)
+            scanf("%d", &G[i]);
 
-            scanf("%d %d", &M, &N);
-            for (int i = 0; i < M; i++)
-                scanf("%d", &A[i]);
-            for (int i = 0; i < N; i++)
-                scanf("%d", &G[i]);
+        for (int i = 1; i <= M; i++) {
+            insert(root, A[i - 1]);
 
-            for (int i = 1; i <= M; i++) {
-                insert(root, A[i - 1]);
-
-                while (get_idx < N && i == G[get_idx]) {
-                    Treap* res = get_kth(root, get_k++);
-                    printf("%d\n", res->val);
-                    get_idx++;
-                }
+            while (get_idx < N && i == G[get_idx]) {
+                Treap* res = get_kth(root, get_k++);
+                printf("%d\n", res->val);
+                get_idx++;
             }
         }
 
