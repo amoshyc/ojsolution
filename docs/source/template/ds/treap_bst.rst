@@ -1,5 +1,5 @@
 ###################################################
-Treap
+Treap (bst)
 ###################################################
 
 .. sidebar:: Tags
@@ -17,12 +17,17 @@ Treap
 .. code-block:: cpp
     :linenos:
 
-    // remember srand(time(NULL)), cannot use on poj(g++)
+    // Remember srand(time(NULL)), but it cannot be used on poj(g++)
     struct Treap { // val: bst, pri: heap
-        int pri, size, val;
+        int pri, size, val, id;
         Treap *lch, *rch;
         Treap() {}
-        Treap(int v) : pri(rand()), size(1), val(v), lch(NULL), rch(NULL) {}
+        Treap(int v) {
+            pri = rand();
+            size = 1;
+            val = v;
+            lch = rch = NULL;
+        }
     };
 
     inline int size(Treap* t) {
@@ -49,18 +54,16 @@ Treap
         }
     }
 
-    // size(a) will be k
-    // t is unable to use afterwards
-    void split(Treap* t, int k, Treap*& a, Treap*& b) {
+    void split(Treap* t, Treap*& a, Treap*& b, int k) {
         if (!t) { a = b = NULL; return; }
         if (size(t->lch) < k) {
             a = t;
-            split(t->rch, k - size(t->lch) - 1, a->rch, b);
+            split(t->rch, a->rch, b, k - size(t->lch) - 1);
             pull(a);
         }
         else {
             b = t;
-            split(t->lch, k, a, b->lch);
+            split(t->lch, a, b->lch, k);
             pull(b);
         }
     }
@@ -79,8 +82,8 @@ Treap
     // k is 1-based
     Treap* get_kth(Treap*& t, int k) {
         Treap *a, *b, *c, *d;
-        split(t, k - 1, a, b);
-        split(b, 1, c, d);
+        split(t, a, b, k - 1);
+        split(b, c, d, 1);
         t = merge(a, merge(c, d));
         return c;
     }
@@ -88,7 +91,7 @@ Treap
     void insert(Treap*& t, int val) {
         int k = get_rank(t, val);
         Treap *a, *b;
-        split(t, k, a, b);
+        split(t, a, b, k);
         pool[NN] = Treap(val);
         Treap* n = &pool[NN++];
         t = merge(merge(a, n), b);
