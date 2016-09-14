@@ -1,0 +1,140 @@
+#####################################
+[POJ] 2104. K-th Number
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_merge_sort``
+    - ``tag_binary_search``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=2104>`_
+******************************************************
+
+給定一個長度為 N 的序列 A，與 M 個詢問。
+針對每個詢問 ``a b k``，請輸出 A[a, b] 中第 k 小的數。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 10^5
+    1 <= M <= 5000
+
+************************
+分析
+************************
+
+.. note:: 歸併樹
+
+使用歸併樹，預處理 :math:`O(NlgN)`，每個詢問 :math:`O(\lg^3 N)`。空間也是 :math:`O(NlgN)`
+
+數字 x 是第 k 小若且唯若，x 是從小到大枚舉，第一個有 >= k 個數小於等於他的數。
+因為有單調性，枚舉可以改用二分搜。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    using namespace std;
+
+    const int MAX_N = 100000;
+    int N, M;
+    int A[MAX_N];
+    int S[MAX_N];
+
+    const int MAX_NN = (1 << 17);
+    int NN;
+    vector<int> seg[2 * MAX_NN - 1];
+
+    void build(int u, int l, int r) {
+        if (l + 1 == r) {
+            if (l < N)
+                seg[u].push_back(A[l]);
+            return;
+        }
+
+        int m = (l + r) / 2;
+        build(u * 2 + 1, l, m);
+        build(u * 2 + 2, m, r);
+        seg[u].resize(r - l);
+        merge(seg[u * 2 + 1].begin(), seg[u * 2 + 1].end(),
+              seg[u * 2 + 2].begin(), seg[u * 2 + 2].end(),
+              seg[u].begin());
+    }
+
+    // return the number of items in [a, b) is less than val
+    int query(int a, int b, int val, int u, int l, int r) {
+        if (l >= b || r <= a) {
+            return 0;
+        }
+
+        if (a <= l && r <= b) {
+            return upper_bound(seg[u].begin(), seg[u].end(), val) -
+                    seg[u].begin();
+        }
+
+        int m = (l + r) / 2;
+        int cnt1 = query(a, b, val, u * 2 + 1, l, m);
+        int cnt2 = query(a, b, val, u * 2 + 2, m, r);
+        return cnt1 + cnt2;
+    }
+
+    // find the k-th smallest number in [a, b)
+    int solve(int a, int b, int k) {
+        // binary search on index of S
+        // C(x) = is the number which is less than S[x] >= k - 1
+        // 0 0 0 1 1 1, first 1
+
+        int lb = 0, ub = N - 1;
+
+        if (query(a, b, S[lb], 0, 0, NN) >= k)
+            return S[lb];
+        // if (query(a, b, S[ub], 0, 0, NN) < k - 1)
+            // impossible;
+        while (ub - lb > 1) {
+            int mid = (lb + ub) / 2;
+            if (query(a, b, S[mid], 0, 0, NN) >= k) ub = mid;
+            else lb = mid;
+        }
+
+        return S[ub];
+    }
+
+    int main() {
+        scanf("%d %d", &N, &M);
+        for (int i = 0; i < N; i++)
+            scanf("%d", &A[i]);
+
+        copy(A, A + N, S);
+        sort(S, S + N);
+
+        NN = 1;
+        while (NN < N)
+            NN <<= 1;
+        build(0, 0, NN);
+
+        while (M--) {
+            int a, b, k;
+            scanf("%d %d %d", &a, &b, &k);
+            a--; b--;
+            printf("%d\n", solve(a, b + 1, k));
+        }
+
+        return 0;
+    }

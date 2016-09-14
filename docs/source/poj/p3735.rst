@@ -1,0 +1,176 @@
+#####################################
+[POJ] 3735. Training little cats
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_fast_pow``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=3735>`_
+******************************************************
+
+一開始有 N 隻貓，各擁有 0 個花生。定義一個週期為執行 K 個操作。
+操作的種類為：
+1. ``g i``: 第 i 隻貓獲得一顆花生。
+2. ``e i``: 第 i 隻貓吃掉牠所有的花生。
+3. ``s i j``: 第 i 隻貓與第 j 隻貓交換他們擁有的花生。
+請輸出 M 個週期後，各隻貓擁有的花生數。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N, K <= 100
+    1 <= M <= 10^9
+
+************************
+分析
+************************
+
+.. note:: 矩陣快速冪
+
+假設測資是::
+
+    3 10 3
+    g 1
+    e 2
+    s 1 2
+
+假設式子是
+
+.. math:: \mathbf{A'} = \mathbf{T} \mathbf{A}
+
+轉移矩陣的建立如下。
+
+``g 1``
+
+.. math::
+
+
+-------------------
+
+這樣寫會對，但 TLE，只要將矩陣乘法優化即可。
+原本是
+
+.. code-block:: cpp
+    :linenos:
+
+    for (int i = 0; i < int(a.size()); i++) {
+        for (int j = 0; j < int(b[0].size()); j++) {
+            for (int k = 0; k < int(a[0].size()); k++) {
+                c[i][j] += a[i][k] * b[k][j];
+            }
+        }
+    }
+
+我們知道 k 也可以放到最外層，這時利用轉移矩陣中有許多的 0，可以優化成
+
+.. code-block:: cpp
+    :linenos:
+
+    for (int k = 0; k < int(a[0].size()); k++) {
+        for (int i = 0; i < int(a.size()); i++) {
+            if (a[i][k] != 0) { // 剪枝
+                for (int j = 0; j < int(b[0].size()); j++) {
+                    c[i][j] += a[i][k] * b[k][j];
+                }
+            }
+        }
+    }
+
+這樣即可 AC
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <iostream>
+    #include <algorithm>
+    #include <vector>
+    using namespace std;
+
+    typedef long long ll;
+    typedef vector<ll> vec;
+    typedef vector<vec> mat;
+
+    mat mul(const mat& a, const mat& b) {
+        mat c(a.size(), vec(b[0].size(), 0ll));
+        for (int k = 0; k < int(a[0].size()); k++) {
+            for (int i = 0; i < int(a.size()); i++) {
+                if (a[i][k] != 0) { // 剪枝
+                    for (int j = 0; j < int(b[0].size()); j++) {
+                        c[i][j] += a[i][k] * b[k][j];
+                    }
+                }
+            }
+        }
+        return c;
+    }
+
+    mat fast_pow(const mat& m, int b) {
+        int n = m.size();
+        mat base = m;
+        mat ans(n, vec(n, 0ll));
+        for (int i = 0; i < n; i++)
+            ans[i][i] = 1;
+        while (b) {
+            if (b & 1)
+                ans = mul(ans, base);
+            base = mul(base, base);
+            b >>= 1;
+        }
+        return ans;
+    }
+
+    int N, M, K;
+
+    int main() {
+        while (scanf("%d %d %d", &N, &M, &K)) {
+            if (N == 0 && M == 0 && K == 0) break;
+
+            mat t(N + 1, vec(N + 1, 0ll));
+            for (int i = 0; i < N + 1; i++)
+                t[i][i] = 1;
+
+            while (K--) {
+                char cmd[5]; scanf("%s", cmd);
+                if (cmd[0] == 'g') {
+                    int i; scanf("%d", &i); i--;
+                    t[i][N] += 1;
+                }
+                if (cmd[0] == 'e') {
+                    int i; scanf("%d", &i); i--;
+                    fill(t[i].begin(), t[i].end(), 0);
+                }
+                if (cmd[0] == 's') {
+                    int i, j; scanf("%d %d", &i, &j); i--; j--;
+                    swap(t[i], t[j]);
+                }
+            }
+
+            mat base(N + 1, vec(1, 0ll));
+            base[N][0] = 1;
+
+            mat res = mul(fast_pow(t, M), base);
+
+            for (int i = 0; i < N; i++) {
+                if (i != 0) printf(" ");
+                printf("%lld", res[i][0]);
+            }
+            puts("");
+        }
+
+        return 0;
+    }
