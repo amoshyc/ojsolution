@@ -35,27 +35,155 @@ Specification
 
 .. note:: 矩陣快速冪
 
-假設測資是::
+設
 
-    3 10 3
-    g 1
-    e 2
-    s 1 2
+.. math:: s_i = \text{第 i 隻貓在當前週期擁有的花生數}
 
-假設式子是
+考慮測資（已改為 0-based）::
 
-.. math:: \mathbf{A'} = \mathbf{T} \mathbf{A}
+    N = 3, K = 4
+    g 0
+    e 1
+    s 0 1
 
-轉移矩陣的建立如下。
+轉移矩陣建立如下。
 
-``g 1``
+1. 一開始沒有任何操作時，每隻貓的花生數維持原值。
 
 .. math::
 
+    \begin{bmatrix}
+    s_0' \\
+    s_1' \\
+    s_2' \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    1 & 0 & 0 \\
+    0 & 1 & 0 \\
+    0 & 0 & 1 \\
+    \end{bmatrix}
+    \begin{bmatrix}
+    s_0 \\
+    s_1 \\
+    s_2 \\
+    \end{bmatrix}
+
+加入操作 ``g 0``，即為 :math:`s_0' = s_0 + 1`
+因為矩陣沒有 ``1`` ，我們補一個 ``1`` 進去。
+
+.. math::
+
+    \begin{bmatrix}
+    s_0' \\
+    s_1' \\
+    s_2' \\
+    1 \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    1 & 0 & 0 & 1 \\
+    0 & 1 & 0 & 0 \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 0 & 1 \\
+    \end{bmatrix}
+    \begin{bmatrix}
+    s_0 \\
+    s_1 \\
+    s_2 \\
+    1 \\
+    \end{bmatrix}
+
+加入操作 ``e 1``，即為 :math:`s_1' = 0`
+這個簡單，式子變成：
+
+.. math::
+
+    \begin{bmatrix}
+    s_0' \\
+    s_1' \\
+    s_2' \\
+    1 \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    1 & 0 & 0 & 1 \\
+    0 & 0 & 0 & 0 \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 0 & 1 \\
+    \end{bmatrix}
+    \begin{bmatrix}
+    s_0 \\
+    s_1 \\
+    s_2 \\
+    1 \\
+    \end{bmatrix}
+
+加入操作 ``s 0 1``，即為:
+
+.. math::
+
+    s_0' &= s_1' \\
+    s_1' &= s_0' \\
+
+注意（因為我們是要交換「當前」的二隻貓的花生數，而不是上個周期的），所以 **不是**
+
+.. math::
+
+    s_0' &= s_1 \\
+    s_1' &= s_0 \\
+
+要實現 ``s 0 1``，我們只需把轉移矩陣的第 ``0``, 第 ``1`` 個 row 交換即可，所以得到：
+
+.. math::
+
+    \begin{bmatrix}
+    s_0' \\
+    s_1' \\
+    s_2' \\
+    1 \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    0 & 0 & 0 & 0 \\
+    1 & 0 & 0 & 1 \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 0 & 1 \\
+    \end{bmatrix}
+    \begin{bmatrix}
+    s_0 \\
+    s_1 \\
+    s_2 \\
+    1 \\
+    \end{bmatrix}
+
+之後看要做幾個周期，轉移矩陣就是幾次方。而一開始每隻貓的花生數都是 0，所以得到
+
+.. math::
+
+    \begin{bmatrix}
+    {result}_0 \\
+    {result}_1 \\
+    {result}_2 \\
+    1 \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    0 & 0 & 0 & 0 \\
+    1 & 0 & 0 & 1 \\
+    0 & 0 & 1 & 0 \\
+    0 & 0 & 0 & 1 \\
+    \end{bmatrix}^{k}
+    \begin{bmatrix}
+    0 \\
+    0 \\
+    0 \\
+    1 \\
+    \end{bmatrix}
 
 -------------------
 
-這樣寫會對，但 TLE，只要將矩陣乘法優化即可。
+模板套一套，答案會正確，但 TLE，此時只要將矩陣乘法優化即可。
 原本是
 
 .. code-block:: cpp
