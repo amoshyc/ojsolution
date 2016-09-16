@@ -1,0 +1,247 @@
+#####################################
+[POJ] 3734. Blocks
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_dp``
+    - ``tag_fast_pow``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=1769>`_
+******************************************************
+
+有 N 個 blocks 排成一列，現從左至右將 blocks 上色，顏色有紅、藍、綠、黃四種。
+將所有 blocks 上色後，紅色 blocks 數量與綠色 blocks 的數量都是偶數的上色方法有幾種？
+請輸出該方法數 mod 10007 後的結果
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 10^9
+
+************************
+分析
+************************
+
+.. note:: 先想 dp，再用矩陣快速冪加速
+
+很明顯 dp 的一個維度必需是紅色與綠色 blocks 數量的奇偶性，設::
+
+    dp[i][0] = 前 i 個 blocks 上完色，紅色 blocks 的數量為偶數，綠色為偶數的方法數
+    dp[i][1] = 前 i 個 blocks 上完色，紅色 blocks 的數量為偶數，綠色為奇數的方法數
+    dp[i][2] = 前 i 個 blocks 上完色，紅色 blocks 的數量為奇數，綠色為偶數的方法數
+    dp[i][3] = 前 i 個 blocks 上完色，紅色 blocks 的數量為奇數，綠色為奇數的方法數
+
+答案即為 dp[N][0]。
+
+考慮第 i + 1 個 blocks 的顏色，可以發現以下轉移
+
+1. 若為紅色::
+
+    dp[i][0] -> dp[i + 1][2]
+    dp[i][1] -> dp[i + 1][3]
+    dp[i][2] -> dp[i + 1][0]
+    dp[i][3] -> dp[i + 1][1]
+
+2. 若為綠色::
+
+    dp[i][0] -> dp[i + 1][1]
+    dp[i][1] -> dp[i + 1][0]
+    dp[i][2] -> dp[i + 1][3]
+    dp[i][3] -> dp[i + 1][2]
+
+3. 若為藍色::
+
+    dp[i][0] -> dp[i + 1][0]
+    dp[i][1] -> dp[i + 1][1]
+    dp[i][2] -> dp[i + 1][2]
+    dp[i][3] -> dp[i + 1][3]
+
+4. 若為黃色::
+
+    dp[i][0] -> dp[i + 1][0]
+    dp[i][1] -> dp[i + 1][1]
+    dp[i][2] -> dp[i + 1][2]
+    dp[i][3] -> dp[i + 1][3]
+
+根據加法原理，即為::
+
+    dp[i + 1][0] = dp[i][2] + dp[i][1] + 2 * dp[i][0]
+    dp[i + 1][1] = dp[i][3] + dp[i][0] + 2 * dp[i][1]
+    dp[i + 1][2] = dp[i][0] + dp[i][3] + 2 * dp[i][2]
+    dp[i + 1][3] = dp[i][1] + dp[i][2] + 2 * dp[i][3]
+
+寫成矩陣型式
+
+.. math::
+
+    \begin{bmatrix}
+    dp[i + 1][0] \\
+    dp[i + 1][1] \\
+    dp[i + 1][2] \\
+    dp[i + 1][3] \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    2 & 1 & 1 & 0 \\
+    1 & 2 & 0 & 1 \\
+    1 & 0 & 2 & 1 \\
+    0 & 1 & 1 & 2 \\
+    \end{bmatrix}
+    \begin{bmatrix}
+    dp[i][0] \\
+    dp[i][1] \\
+    dp[i][2] \\
+    dp[i][3] \\
+    \end{bmatrix}
+
+即為
+
+.. math::
+
+    \begin{bmatrix}
+    dp[i][0] \\
+    dp[i][1] \\
+    dp[i][2] \\
+    dp[i][3] \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    2 & 1 & 1 & 0 \\
+    1 & 2 & 0 & 1 \\
+    1 & 0 & 2 & 1 \\
+    0 & 1 & 1 & 2 \\
+    \end{bmatrix}^{i}
+    \begin{bmatrix}
+    dp[0][0] \\
+    dp[0][1] \\
+    dp[0][2] \\
+    dp[0][3] \\
+    \end{bmatrix}
+
+想一下，即可知 dp[0] 的值，所以得到
+
+.. math::
+
+    \begin{bmatrix}
+    dp[i][0] \\
+    dp[i][1] \\
+    dp[i][2] \\
+    dp[i][3] \\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    2 & 1 & 1 & 0 \\
+    1 & 2 & 0 & 1 \\
+    1 & 0 & 2 & 1 \\
+    0 & 1 & 1 & 2 \\
+    \end{bmatrix}^{i}
+    \begin{bmatrix}
+    1 \\
+    0 \\
+    0 \\
+    0 \\
+    \end{bmatrix}
+
+之後模板套一套即可。
+
+------------
+
+題外話，因為 10007 是質數，這題 fast_pow 還可以用費馬小定理優化一下，時間少一半左右。
+邏輯腦那本書解這題的 dp 型式跟本文不太一樣，
+事實上那只是 dp[i][1] 與 dp[i][2] 合併的結果，
+因為轉移方程式中，dp[i][1] 與 dp[i][2] 都是一同出現，所以可以這樣做。
+不過我覺得那樣寫很不直覺…我這樣的寫法比較符合思考順序。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <iostream>
+    #include <vector>
+    #include <algorithm>
+    using namespace std;
+
+    typedef long long ll;
+    typedef vector<ll> vec;
+    typedef vector<vec> mat;
+
+    const ll mod = 10007;
+
+    mat mul(const mat& a, const mat& b) {
+        int p = a.size(), q = a[0].size(), r = b[0].size();
+        mat res(p, vec(r, 0ll));
+        for (int i = 0; i < p; i++) {
+            for (int j = 0; j < r; j++) {
+                for (int k = 0; k < q; k++) {
+                    res[i][j] = (res[i][j] + a[i][k] * b[k][j] % mod) % mod;
+                }
+            }
+        }
+        return res;
+    }
+
+    mat fast_pow(const mat& a, ll b) {
+        mat base = a; int n = a.size();
+        mat ans = mat(n, vec(n, 0ll));
+        for (int i = 0; i < n; i++)
+            ans[i][i] = 1;
+        b %= (mod - 1); // Fermat's Little Theorem
+        while (b) {
+            if (b & 1)
+                ans = mul(ans, base);
+            base = mul(base, base);
+            b >>= 1;
+        }
+        return ans;
+    }
+
+    int main() {
+        int TC;
+        scanf("%d", &TC);
+
+        int t[4][4] = {
+            {2, 1, 1, 0},
+            {1, 2, 0, 1},
+            {1, 0, 2, 1},
+            {0, 1, 1, 2}
+        };
+
+        int b[4][1] = {
+            {1},
+            {0},
+            {0},
+            {0}
+        };
+
+        mat T(4, vec(4, 0ll));
+        for (int r = 0; r < 4; r++)
+            for (int c = 0; c < 4; c++)
+                T[r][c] = t[r][c];
+
+        mat B(4, vec(1, 0ll));
+        for (int r = 0; r < 4; r++)
+            B[r][0] = b[r][0];
+
+        while (TC--) {
+            int N;
+            scanf("%d", &N);
+            mat res = mul(fast_pow(T, N), B);
+            printf("%lld\n", res[0][0]);
+        }
+
+        return 0;
+    }

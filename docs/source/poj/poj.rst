@@ -35,5 +35,6 @@ POJ
     p3469.rst
     p3565.rst
     p3580.rst
+    p3734.rst
     p3735.rst
     p3977.rst
