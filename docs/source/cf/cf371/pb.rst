@@ -48,7 +48,7 @@ Specification
 4. K >= 4，明顯無解
 
 ************************
-AC Code 1
+AC Code
 ************************
 
 .. code-block:: cpp

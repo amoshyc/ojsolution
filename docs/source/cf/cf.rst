@@ -2,23 +2,38 @@
 CF
 ########################
 
+.. contents:: TOC
+    :depth: 2
+
+**********************
+Regular Round
+**********************
+
 .. toctree::
     :maxdepth: 1
 
-    Eduactional Round #16 <cfedu16/index.rst>
-    Eduactional Round #12 <cfedu12/index.rst>
-    Eduactional Round #9 <cfedu9/index.rst>
-    Educational Round #8 <cfedu8/index.rst>
-    Educational Round #7 <cfedu7/index.rst>
-    Educational Round #6 <cfedu6/index.rst>
+    #372 <cf372/index.rst>
+    #371 <cf371/index.rst>
+    #369 <cf369/index.rst>
+    #368 <cf368/index.rst>
+    #367 <cf367/index.rst>
+    #354 <cf354/index.rst>
+    #353 <cf353/index.rst>
+    #346 <cf346/index.rst>
+    #343 <cf343/index.rst>
+    #342 <cf342/index.rst>
+    #319 <cf319/index.rst>
 
-    Regular Round #371 <cf371/index.rst>
-    Regular Round #369 <cf369/index.rst>
-    Regular Round #368 <cf368/index.rst>
-    Regular Round #367 <cf367/index.rst>
-    Regular Round #354 <cf354/index.rst>
-    Regular Round #353 <cf353/index.rst>
-    Regular Round #346 <cf346/index.rst>
-    Regular Round #343 <cf343/index.rst>
-    Regular Round #342 <cf342/index.rst>
-    Regular Round #319 <cf319/index.rst>
+**************************
+Educational Round
+**************************
+
+.. toctree::
+    :maxdepth: 1
+
+    #16 <cfedu16/index.rst>
+    #12 <cfedu12/index.rst>
+    #9 <cfedu9/index.rst>
+    #8 <cfedu8/index.rst>
+    #7 <cfedu7/index.rst>
+    #6 <cfedu6/index.rst>
