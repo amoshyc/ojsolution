@@ -35,7 +35,7 @@ Tarjan SCC Algorithm
         st.push_back(v);
         in_st[v] = true;
 
-        for (size_t i = 0; i < g[v].size(); i++) {
+        for (int i = 0; i < int(g[v].size()); i++) {
             const int u = g[v][i];
             if (dfn[u] == -1) {
                 scc(u);
@@ -57,7 +57,7 @@ Tarjan SCC Algorithm
         }
     }
 
-    void tarjan() {
+    void tarjan() { // scc 建立的順序即為反向的拓璞排序
         st.clear();
         fill(dfn, dfn + V, -1);
         fill(low, low + V, INF);
@@ -74,4 +74,4 @@ Tarjan SCC Algorithm
 模板驗證
 ************************
 
-`poj2186 <http://codepad.org/mcGe3ev0>`_
+`poj2186 <../../poj/p2186.html>`_

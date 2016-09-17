@@ -1,0 +1,169 @@
+#####################################
+[POJ] 2186. Popular Cows
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_scc``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=2186>`_
+******************************************************
+
+有 N 隻牛，M 種有向關係。每個關係 <a, b> 代表牛 a 認為牛 b 是 popular。
+這個關係是遞移（transitive）的，即 <a, b>, <b, c> 可以推出 <a, c>。
+請問這 N 隻牛中，有幾隻牛是被其它所有牛認為是 popular 的？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 50000
+    1 <= M <= 500000
+
+************************
+分析
+************************
+
+.. note:: scc
+
+建圖（節點為牛，邊為關係），強連通單元分解後，圖被轉為一個或多個 DAG。
+明顯的，若有兩個以上的 DAG 即無解，這代表一開始就不是連通的，當然無解。
+這題若有解，分解後必只有一個 DAG。
+而這個 DAG 的拓璞排序的最後一項（最後一個單元）即為所求。
+在實作上，可以利用最後一項是唯一 out degree 為 0 的強連通單元來找這個單元。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <iostream>
+    #include <vector>
+    #include <stack>
+    #include <queue>
+    #include <map>
+    #include <set>
+    #include <deque>
+    #include <algorithm>
+    #include <functional>
+    #include <iomanip>
+    #include <sstream>
+    #include <numeric>
+    #include <cstdio>
+    #include <cstdlib>
+    #include <cstring>
+    #include <cctype>
+    #include <ctime>
+    #include <cmath>
+    // #include <tuple> // c++11
+    using namespace std;
+
+    const int MAX_V = 10000;
+    const int INF = 0x3f3f3f3f;
+    int V;
+    vector<int> g[MAX_V];
+
+    int dfn_idx = 0;
+    int scc_cnt = 0;
+    int dfn[MAX_V];
+    int low[MAX_V];
+    int belong[MAX_V];
+    bool in_st[MAX_V];
+    vector<int> st;
+
+    void scc(int v) {
+        dfn[v] = low[v] = dfn_idx++;
+        st.push_back(v);
+        in_st[v] = true;
+
+        for (size_t i = 0; i < g[v].size(); i++) {
+            const int u = g[v][i];
+            if (dfn[u] == -1) {
+                scc(u);
+                low[v] = min(low[v], low[u]);
+            }
+            else if (in_st[u]) {
+                low[v] = min(low[v], dfn[u]);
+            }
+        }
+
+        if (dfn[v] == low[v]) {
+            int k;
+            do {
+                k = st.back(); st.pop_back();
+                in_st[k] = false;
+                belong[k] = scc_cnt;
+            } while (k != v);
+            scc_cnt++;
+        }
+    }
+
+    void tarjan() {
+        st.clear();
+        fill(dfn, dfn + V, -1);
+        fill(low, low + V, INF);
+        dfn_idx = 0;
+        scc_cnt = 0;
+        for (int v = 0; v < V; v++) {
+            if (dfn[v] == -1) {
+                scc(v);
+            }
+        }
+    }
+
+    int solve() {
+        tarjan();
+
+        vector<int> out(scc_cnt, 0);
+        for (int v = 0; v < V; v++) {
+            for (size_t i = 0; i < g[v].size(); i++) {
+                int u = g[v][i];
+                if (belong[v] != belong[u]) {
+                    out[belong[v]]++;
+                }
+            }
+        }
+
+        // find the target component
+        int comp_idx = -1, comp_cnt = 0;
+        for (int c = 0; c < scc_cnt; c++) {
+            if (out[c] == 0) {
+                comp_idx = c;
+                comp_cnt++;
+            }
+        }
+
+        if (comp_cnt != 1) {
+            return 0;
+        }
+
+        int ans = 0;
+        for (int v = 0; v < V; v++) {
+            if (belong[v] == comp_idx) {
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+    int main() {
+        int N, M;
+        scanf("%d %d", &N, &M);
+        for (int i = 0; i < M; i++) {
+            int u, v; scanf("%d %d", &u, &v); u--; v--;
+            g[u].push_back(v);
+        }
+
+        V = N;
+        printf("%d\n", solve());
+
+        return 0;
+    }
