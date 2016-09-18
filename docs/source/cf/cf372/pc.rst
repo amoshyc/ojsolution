@@ -62,7 +62,7 @@ Specification
 AC Code 1 (python 3)
 ************************
 
-.. code-block:: cpp
+.. code-block:: python3
     :linenos:
 
     N = int(input())
