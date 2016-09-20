@@ -1,0 +1,218 @@
+#####################################
+[UVA] 11294. Manhattan
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_2sat``
+
+.. contents:: TOC
+    :depth: 2
+
+*********************************************************************
+`題目 <https://uva.onlinejudge.org/external/112/11294.pdf>`_
+*********************************************************************
+
+一對新人(h[0], w[0])要舉行婚禮，包含新人，共有 N 對 couples (h[], w[])參加。
+婚禮上，所有人於長桌的兩側坐。給出一些限制：
+
+1. couple 不能坐同一側
+2. 其中有 M 個婚外情關係 (u, v) (呃…)
+   u, v 可能同性別也可能不同性別。
+   u, v 不能同時坐於新娘的對側。
+   （即 u, v 至少一人要跟新娘坐在同一側）
+
+請寫一個程式滿足指定一個方安上述限制，最後輸出哪些人是跟新娘坐在同一側。
+無解時，輸出 "bad luck"
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 100（題目未指明，但設 100 已足夠）
+
+************************
+分析
+************************
+
+.. note:: 2-sat
+
+2-sat 標準題。
+
+每個人視為一個邏輯變數。
+
+.. math::
+
+    \text {跟新娘坐在同一側為 } &T \\
+    \text {跟新娘坐在不同側為 } &F
+
+我們可以得到下述三種邊
+
+1. 新娘一定跟新娘同一側，即 w[0] 必為 T，即 :math:`w_0 \lor w_0` 即建邊 :math:`(\lnot w_0, \, w_0)`
+
+2. 每對 couple :math:`h_i,w_i` 互不同側，即
+
+.. math::
+
+    &h_i \oplus w_i   \\
+    &= \lnot ( (h_i \land w_i) \lor (\lnot h_i \land w_i))     \\
+    &= (\lnot h_i \lor \lnot w_i) \land (h_i \lor w_i)     \\
+
+3. 每個關係 :math:`(u, v)`，兩人不能同時在新娘的對側，即至少一人與新娘同側
+
+.. math:: u \lor v
+
+之後就是 2-sat 的模板了。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    const int MAX_N = 100;
+    int N, M;
+
+    const int MAX_V = 4 * MAX_N;
+    const int INF = 0x3f3f3f3f;
+    int dfn_idx = 0;
+    int scc_cnt = 0;
+    int dfn[MAX_V];
+    int low[MAX_V];
+    int belong[MAX_V];
+    bool in_st[MAX_V];
+    vector<int> g[MAX_V];
+    vector<int> st;
+
+    void scc(int v) {
+        dfn[v] = low[v] = dfn_idx++;
+        st.push_back(v);
+        in_st[v] = true;
+
+        for (int i = 0; i < int(g[v].size()); i++) {
+            const int u = g[v][i];
+            if (dfn[u] == -1) {
+                scc(u);
+                low[v] = min(low[v], low[u]);
+            }
+            else if (in_st[u]) {
+                low[v] = min(low[v], dfn[u]);
+            }
+        }
+
+        if (dfn[v] == low[v]) {
+            int k;
+            do {
+                k = st.back(); st.pop_back();
+                in_st[k] = false;
+                belong[k] = scc_cnt;
+            } while (k != v);
+            scc_cnt++;
+        }
+    }
+
+    void tarjan(int V) { // scc 建立的順序即為反向的拓璞排序
+        st.clear();
+        fill(dfn, dfn + V, -1);
+        fill(low, low + V, INF);
+        dfn_idx = 0;
+        scc_cnt = 0;
+        for (int v = 0; v < V; v++) {
+            if (dfn[v] == -1) {
+                scc(v);
+            }
+        }
+    }
+
+    int get_inp() {
+        int id; char gender[3];
+        scanf("%d%s", &id, gender);
+        id *= 2;
+        if (gender[0] == 'w')
+            id += 2 * N;
+        return id;
+    }
+
+    int main() {
+        // [0, 2 * N) : h
+        // [2 * N, 4 * N) : w
+
+        // T : at same side as bride
+        // F : at the other side of bride
+
+        // h xor w
+        // = ~( (h and w) or (~h and ~w) )
+        // = (~h or ~w) and (h or w)
+
+        while (scanf("%d %d", &N, &M)) {
+            if (N == 0 && M == 0) break;
+
+            // init
+            for (int i = 0; i < 4 * N; i++)
+                g[i].clear();
+
+            // w[0] should be T
+            g[(2 * N) ^ 1].push_back(2 * N);
+
+            // h[i] 與 w[i] 不同邊
+            for (int h = 0; h < 2 * N; h += 2) {
+                int w = h + 2 * N;
+                // h xor w
+                g[h].push_back(w ^ 1);
+                g[w].push_back(h ^ 1);
+                g[h ^ 1].push_back(w);
+                g[w ^ 1].push_back(h);
+            }
+
+            while (M--) {
+                int u = get_inp();
+                int v = get_inp();
+                // u or v
+                g[u ^ 1].push_back(v);
+                g[v ^ 1].push_back(u);
+            }
+
+            tarjan(4 * N);
+
+            bool ok = true;
+            for (int i = 0; i < 4 * N; i += 2) {
+                if (belong[i] == belong[i ^ 1]) {
+                    ok = false;
+                    break;
+                }
+            }
+            if (!ok) {
+                puts("bad luck");
+                continue;
+            }
+
+            bool is_first = true;
+            for (int h = 2; h < 2 * N; h += 2) {
+                if (belong[h] < belong[h ^ 1]) {
+                    if (is_first) is_first = false;
+                    else {
+                        printf(" ");
+                    }
+                    printf("%dh", h / 2);
+                }
+            }
+            for (int w = 2 * N + 2; w < 4 * N; w += 2) {
+                if (belong[w] < belong[w ^ 1]) {
+                    if (is_first) is_first = false;
+                    else {
+                        printf(" ");
+                    }
+                    printf("%dw", (w - 2 * N) / 2);
+                }
+            }
+            puts("");
+        }
+
+        return 0;
+    }

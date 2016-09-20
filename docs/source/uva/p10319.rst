@@ -1,0 +1,197 @@
+#####################################
+[UVA] 10319. Manhattan
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_2sat``
+
+.. contents:: TOC
+    :depth: 2
+
+*********************************************************************
+`題目 <https://uva.onlinejudge.org/external/103/p10319.pdf>`_
+*********************************************************************
+
+假設有一個城市是由 H 條東西向的路 r[]，與 W 條南北向的路組成 c[]。
+這些路交出 H * W 個交點，每個交點由一條 r，一條 c 定義。
+請為每條路指定方向（r 向東或向西、c 向南或向北）。
+
+邊有方向後，兩個交點之間若存在一條路徑，只轉彎一次，即可從其中一個點到達另一個點，
+我們稱這兩個交點間有 simple path。
+
+現給定 M 個點對（r1[], c1[], r2[], c2[]）
+請問對於所有邊，存不存在一種方向的 assignment，
+使得交點 (r1[i], c1[i]), 與交點 (r2[i], c2[i]) 之間存在一條以上的 simple path
+
+************************
+Specification
+************************
+
+::
+
+    1 <= H, W <= 30
+
+************************
+分析
+************************
+
+.. note:: 2-sat
+
+把每個 r，每個 c 視為一個邏輯變數， **向東向南視為 True** ，則對於點對
+
+.. math:: r_1, c_1, r_2, c_2 \quad (r_1 < r_2 ,\, c_1 < c_2)
+
+我們可以寫出等式（見下圖左）：
+
+.. math:: (r_1 \land c_2) \lor (c_1 \land r_2)
+
+.. image:: http://i.imgur.com/7qjir1p.jpg
+
+利用 :math:`p \lor (q \land r) \leftrightarrow ((p \land q) \lor (p \land r))` 兩次，可以將式子改寫為：
+
+.. math::
+
+    (r_1 \lor c_1) \land
+    (c_2 \lor c_1) \land
+    (r_1 \lor r_2) \land
+    (c_2 \lor r_2)
+
+這就可以使用 2-sat 來求解了。
+
+如果有 :math:`r_1 > r_2` 或 :math:`c_1 > c_2` 的情況，將 **另一個變數** 取 complement 即可，如上圖右。
+另外得特判掉 :math:`r_1 = r_2` 與 :math:`c_1 = c_2` 的情況。
+此時兩個交點在同一條線上，只有這條邊的方向被確定。細節請看程式碼
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <bits/stdc++.h>
+    using namespace std;
+
+    const int MAX_H = 30;
+    const int MAX_W = 30;
+    int H, W;
+
+    const int MAX_V = 2 * (MAX_H + MAX_W);
+    const int INF = 0x3f3f3f3f;
+    int dfn_idx = 0;
+    int scc_cnt = 0;
+    int dfn[MAX_V];
+    int low[MAX_V];
+    int belong[MAX_V];
+    bool in_st[MAX_V];
+    vector<int> g[MAX_V];
+    vector<int> st;
+
+    void scc(int v) {
+        dfn[v] = low[v] = dfn_idx++;
+        st.push_back(v);
+        in_st[v] = true;
+
+        for (int i = 0; i < int(g[v].size()); i++) {
+            const int u = g[v][i];
+            if (dfn[u] == -1) {
+                scc(u);
+                low[v] = min(low[v], low[u]);
+            }
+            else if (in_st[u]) {
+                low[v] = min(low[v], dfn[u]);
+            }
+        }
+
+        if (dfn[v] == low[v]) {
+            int k;
+            do {
+                k = st.back(); st.pop_back();
+                in_st[k] = false;
+                belong[k] = scc_cnt;
+            } while (k != v);
+            scc_cnt++;
+        }
+    }
+
+    void tarjan(int V) { // scc 建立的順序即為反向的拓璞排序
+        st.clear();
+        fill(dfn, dfn + V, -1);
+        fill(low, low + V, INF);
+        dfn_idx = 0;
+        scc_cnt = 0;
+        for (int v = 0; v < V; v++) {
+            if (dfn[v] == -1) {
+                scc(v);
+            }
+        }
+    }
+
+    int main() {
+        // [0, 2H) : rows
+        // [2H, 2H + 2W] : cols
+
+        int TC;
+        scanf("%d", &TC);
+        while (TC--) {
+            int M;
+            scanf("%d %d %d", &H, &W, &M);
+
+            for (int i = 0; i < 2 * (H + W); i++)
+                g[i].clear();
+
+            while (M--) {
+                int r1, c1, r2, c2;
+                scanf("%d %d %d %d", &r1, &c1, &r2, &c2);
+                r1--; c1--; r2--; c2--;
+
+                r1 *= 2; c1 *= 2; r2 *= 2; c2 *= 2;
+                c1 += 2 * H; c2 += 2 * H;
+
+                if (r1 > r2) { c1 ^= 1; c2 ^= 1; }
+                if (c1 > c2) { r1 ^= 1; r2 ^= 1; }
+
+                if (r1 == r2 && c1 == c2)
+                    continue;
+                if (r1 == r2) { // r1 = T
+                    g[r1 ^ 1].push_back(r1);
+                    continue;
+                }
+                if (c1 == c2) {
+                    g[c1 ^ 1].push_back(c1);
+                    continue;
+                }
+
+                // (r1 and c2) or (c1 and r2)
+                // = (r1 or c1) and (c2 or c1) and
+                //   (r1 or r2) and (c2 or r2)
+
+                g[r1 ^ 1].push_back(c1);
+                g[c1 ^ 1].push_back(r1);
+
+                g[c2 ^ 1].push_back(c1);
+                g[c1 ^ 1].push_back(c2);
+
+                g[r1 ^ 1].push_back(r2);
+                g[r2 ^ 1].push_back(r1);
+
+                g[c2 ^ 1].push_back(r2);
+                g[r2 ^ 1].push_back(c2);
+            }
+
+            tarjan(2 * (H + W));
+
+            bool ok = true;
+            for (int i = 0; i < 2 * (H + W); i += 2) {
+                if (belong[i] == belong[i ^ 1]) {
+                    ok = false;
+                    break;
+                }
+            }
+
+            puts((ok) ? "Yes" : "No");
+        }
+
+        return 0;
+    }

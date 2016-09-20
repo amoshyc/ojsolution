@@ -73,6 +73,7 @@ Graph
 - tag_min_cost_flow
 - tag_bipartite_matching
 - tag_connected_component
+- tag_2sat
 
 ************************
 Math
