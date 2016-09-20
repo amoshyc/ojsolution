@@ -9,6 +9,7 @@ Graph
     dijkstra.rst
     spfa.rst
 
+    2-sat.rst
     tarjan_scc.rst
     kruskal.rst
 

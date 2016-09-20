@@ -88,7 +88,7 @@ Treap (implicit key)
         return &pool[NN++];
     }
 
-    Treap* merge(Treap* a, Treap* b) {
+    Treap* merge(Treap* a, Treap* b) { // a < b
         if (!a || !b) return (a ? a : b);
         if (a->pri > b->pri) {
             push(a);

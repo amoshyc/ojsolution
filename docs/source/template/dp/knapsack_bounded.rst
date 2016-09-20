@@ -14,27 +14,38 @@
 程式碼
 ************************
 
+二進制拆解轉 01 背包。
+例如 22 是拆成 [1, 2, 4, 8, 7]
+前四個 [1, 2, 4, 8] 可以組出 [0, 15] 中的任何數
+再加一個 7，可以組出 [0, 22] 中的任何數
+
 .. code-block:: cpp
     :linenos:
 
-    const int MAX_N = 20;
-    const int MAX_W = 1000;
-    int N, W;
-    ll w[MAX_N + 1];
-    ll v[MAX_N + 1];
-    ll n[MAX_N + 1];
-    ll dp[MAX_N + 1][MAX_W + 1];
+    typedef long long ll;
 
-    void knapsack() {
-        for (int i = 1; i <= N; i++)
-            for (int j = 0; j <= W; j++)
-                for (int k = 0; k <= n[i] && j - k * w[i] >= 0; k++)
-                    dp[i][j] = max(dp[i][j], dp[i - 1][j - k * w[i]] + k * v[i]);
+    struct Item {
+        ll v, w;
+    };
+
+    vector<Item> items;
+    for (int i = 0; i < N; i++) {
+        ll val, w, num;
+        for (ll k = 1; k <= num; k *= 2) {
+            items.push_back((Item) {k * val, k * w});
+            num -= k;
+        }
+        if (num > 0) {
+            items.push_back((Item) {num * val, num * w});
+        }
     }
+
+    printf("%lld\n", knapsack01(items, W));
+
 
 
 ************************
 模板驗證
 ************************
 
-待測
+`poj1276 <../../poj/p1276.html>`_

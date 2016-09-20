@@ -19,7 +19,7 @@ Treap (bst)
 
     // Remember srand(time(NULL)), but it cannot be used on poj(g++)
     struct Treap { // val: bst, pri: heap
-        int pri, size, val, id;
+        int pri, size, val;
         Treap *lch, *rch;
         Treap() {}
         Treap(int v) {
@@ -40,7 +40,7 @@ Treap (bst)
     int NN = 0;
     Treap pool[30000];
 
-    Treap* merge(Treap* a, Treap* b) {
+    Treap* merge(Treap* a, Treap* b) { // a < b
         if (!a || !b) return (a ? a : b);
         if (a->pri > b->pri) {
             a->rch = merge(a->rch, b);

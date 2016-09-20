@@ -23,18 +23,27 @@
 .. code-block:: cpp
     :linenos:
 
-    int N, W, w[i], v[i];
-    int dp[MAX_W + 1];
+    typedef long long ll;
 
-    dp[0] = 0;
-    for (int i = 1; i <= N; i++) {
-        for (int j = W; j >= w[i]; j--) {
-            dp[j] = max(dp[j], dp[j - w[i]] + v[i]);
+    struct Item {
+        ll v, w;
+    };
+
+    const int MAX_W = 100000;
+    ll dp[MAX_W + 1];
+
+    ll knapsack01(const vector<Item>& items, int W) {
+        fill(dp, dp + W + 1, 0ll);
+        for (int i = 0; i < int(items.size()); i++) {
+            for (int j = W; j >= items[i].w; j--) {
+                dp[j] = max(dp[j], dp[j - items[i].w] + items[i].v);
+            }
         }
+        return dp[W];
     }
 
 ************************
 模板驗證
 ************************
 
-待測
+`poj1276 <../../poj/p1276.html>`_
