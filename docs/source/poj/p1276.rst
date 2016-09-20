@@ -1,0 +1,91 @@
+#####################################
+[POJ] 1276. K-th Number
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_dp``
+
+.. contents:: TOC
+    :depth: 2
+
+
+******************************************************
+`題目 <http://poj.org/problem?id=1276>`_
+******************************************************
+
+給定 N 個數字 D[i]，第 i 個數字有 n[i] 個。
+請問在 M 以下（含 M）所能組出的最大總和是多少？
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N <= 10
+    1 <= M <= 10^5
+    1 <= n[i] <= 10^3
+    1 <= D[i] <= 10^3
+
+************************
+分析
+************************
+
+.. note:: 多重背包轉零一背包
+
+重量與價值是相同值，多重背包裸題。
+須二進制拆解轉零一背包加速。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    // #include <bits/stdc++.h>
+    #include <cstdio>
+    #include <vector>
+    #include <algorithm>
+    using namespace std;
+
+    typedef long long ll;
+
+    struct Item {
+        ll v, w;
+    };
+
+    const int MAX_W = 100000;
+    ll dp[MAX_W + 1];
+
+    ll knapsack01(const vector<Item>& items, int W) {
+        fill(dp, dp + W + 1, 0ll);
+        for (int i = 0; i < int(items.size()); i++) {
+            for (int j = W; j >= items[i].w; j--) {
+                dp[j] = max(dp[j], dp[j - items[i].w] + items[i].v);
+            }
+        }
+        return dp[W];
+    }
+
+    int main() {
+        ll W; int N;
+        while (scanf("%lld %d", &W, &N) != EOF) {
+            vector<Item> items;
+            for (int i = 0; i < N; i++) {
+                ll val, num;
+                scanf("%lld %lld", &num, &val);
+                for (ll k = 1; k <= num; k *= 2) {
+                    items.push_back((Item) {k * val, k * val});
+                    num -= k;
+                }
+                if (num > 0) {
+                    items.push_back((Item) {num * val, num * val});
+                }
+            }
+
+            printf("%lld\n", knapsack01(items, W));
+        }
+        return 0;
+    }

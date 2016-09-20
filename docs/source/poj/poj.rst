@@ -5,6 +5,7 @@ POJ
 .. toctree::
     :maxdepth: 1
 
+    p1276.rst
     p1308.rst
     p1442.rst
     p1769.rst
