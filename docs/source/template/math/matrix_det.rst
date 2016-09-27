@@ -41,8 +41,7 @@ Matrix Determinant
                 }
 
                 if (a != i) {
-                    for (int k = 0; k < n; k++)
-                        swap(m[i][k], m[j][k]);
+                    swap(m[i], m[j]);
                     det = -det;
                 }
             }

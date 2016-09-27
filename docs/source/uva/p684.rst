@@ -28,7 +28,7 @@ Specification
 分析
 ************************
 
-.. note:: AC 自動機模版題
+.. note:: 高斯消去法
 
 用 Gaussian elimination （不是 Gaussian-Jordan elimination）把矩陣上三角化。
 主對角線的項的乘積即為答案。這題不能用浮點數，所以使用 gcd 的想法改寫 Gaussian elimination。
@@ -62,8 +62,7 @@ AC Code 1
                 }
 
                 if (a != i) {
-                    for (int k = 0; k < n; k++)
-                        swap(m[i][k], m[j][k]);
+                    swap(m[i], m[j]);
                     det = -det;
                 }
             }
