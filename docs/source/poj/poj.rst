@@ -7,6 +7,7 @@ POJ
 
     p1276.rst
     p1308.rst
+    p1330.rst
     p1442.rst
     p1769.rst
     p1984.rst
