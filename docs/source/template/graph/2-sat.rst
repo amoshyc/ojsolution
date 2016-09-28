@@ -55,7 +55,7 @@ xor:
 .. math::
 
     &p \oplus q   \\
-    &= \lnot ( (p \land q) \lor (\lnot p \land q))     \\
+    &= \lnot ( (p \land q) \lor (\lnot p \land \lnot q))     \\
     &= (\lnot p \lor \lnot q) \land (p \lor q)     \\
 
 ************************
