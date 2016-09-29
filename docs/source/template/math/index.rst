@@ -8,6 +8,7 @@ Math
     fast_pow.rst
     fast_pow_matrix.rst
     matrix_det.rst
+    gauss_jordan.rst
     fft.rst
     build_primes.rst
     extgcd.rst

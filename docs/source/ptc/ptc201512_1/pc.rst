@@ -4,8 +4,7 @@ C. Warehouse
 
 .. sidebar:: Tags
 
-    - ``tag_fast_pow``
-    - ``tag_preprocess``
+    - ``tag_doubling``
 
 .. contents:: TOC
     :depth: 2

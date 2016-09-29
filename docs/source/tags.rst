@@ -27,6 +27,8 @@ Technique
 - tag_min_vertex_cover
 - tag_pigeonhole
 - tag_offline
+- tag_idastar
+- tag_doubling
 
 ************************
 Data Structure
