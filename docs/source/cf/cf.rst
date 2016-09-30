@@ -34,3 +34,12 @@ Educational Round
     #8 <cfedu8/index.rst>
     #7 <cfedu7/index.rst>
     #6 <cfedu6/index.rst>
+
+**************************
+Gym
+**************************
+
+.. toctree::
+    :maxdepth: 1
+
+    ICPC, Egypt, 2015 <cf100814/index.rst>
