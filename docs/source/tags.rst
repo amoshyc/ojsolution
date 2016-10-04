@@ -76,6 +76,7 @@ Graph
 - tag_bipartite_matching
 - tag_connected_component
 - tag_2sat
+- tag_euler_cycle
 
 ************************
 Math

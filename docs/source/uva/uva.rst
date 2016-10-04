@@ -15,3 +15,4 @@ UVa Online Judge
     p10319.rst
     p10369.rst
     p11294.rst
+    p11354.rst

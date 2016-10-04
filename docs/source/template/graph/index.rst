@@ -16,3 +16,6 @@ Graph
     bipartite_matching.rst
     max_flow.rst
     min_cost_flow.rst
+
+    min_btn.rst
+    euler_cycle.rst

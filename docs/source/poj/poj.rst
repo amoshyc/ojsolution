@@ -16,6 +16,7 @@ POJ
     p2104.rst
     p2135.rst
     p2186.rst
+    p2230.rst
     p2349.rst
     p2441.rst
     p2686.rst
