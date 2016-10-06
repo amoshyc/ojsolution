@@ -36,7 +36,7 @@ Specification
 第一份 code 為手寫 linked list，第二份為使用 C++ 內建的 list
 
 ************************
-AC Code 1 (954ms)
+AC Code 1 (922ms)
 ************************
 
 .. code-block:: cpp
@@ -45,7 +45,6 @@ AC Code 1 (954ms)
     #include <cstdio>
     #include <cstdlib>
     #include <cstring>
-    #include <list>
     #include <vector>
     #include <algorithm>
     using namespace std;
@@ -53,11 +52,27 @@ AC Code 1 (954ms)
     const int MAX_N = 10000;
     const int MAX_M = 50000;
 
+    // list
+    struct Node {
+        int val;
+        Node *nxt;
+    };
+    int NN = 0;
+    Node pool[2 * MAX_M + 1]; // 給定的圖 E 條有向邊，環最大有 E + 1 個節點
+    Node* root = NULL;
+
+    Node* new_node(int v) {
+        Node* it = &pool[NN++];
+        it->val = v;
+        it->nxt = NULL;
+        return it;
+    }
+
     // graph
-    int N, M;
+    int N, M; // V, E
+    vector<int> cycle; // 存找到的（小）歐拉環
     vector<int> g[MAX_N];
 
-    vector<int> cycle;
     void dfs(int u) {
         cycle.push_back(u);
         if (g[u].size() > 0) {
@@ -67,30 +82,12 @@ AC Code 1 (954ms)
         }
     }
 
-    // list
-    struct Node {
-        int data;
-        Node *nxt;
-    };
-    int NN = 0;
-    Node pool[MAX_M * 2 + 1]; // 給定的圖 E 條邊，最大的環有 E * 2 + 1 個節點
-    Node* root = NULL;
-
-    Node* new_node(int v) {
-        Node* it = &pool[NN++];
-        it->data = v;
-        it->nxt = NULL;
-        return it;
-    }
-
-    void find_euler_cycle() {
-        root = new_node(0);
-
+    void find_euler_cycle(int s) {
+        root = new_node(s);
         for (Node* it = root; it != NULL; it = it->nxt) {
-            int u = it->data;
-            if (g[u].size() > 0) {
+            if (g[it->val].size() > 0) {
                 cycle.clear();
-                dfs(u);
+                dfs(it->val);
 
                 Node* nxt = it->nxt;
                 Node* pre = it;
@@ -112,10 +109,10 @@ AC Code 1 (954ms)
             g[v].push_back(u);
         }
 
-        find_euler_cycle();
+        find_euler_cycle(0);
 
         for (Node* it = root; it != NULL; it = it->nxt) {
-            printf("%d\n", (it->data) + 1);
+            printf("%d\n", (it->val) + 1);
         }
 
         return 0;
