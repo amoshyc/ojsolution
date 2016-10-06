@@ -9,6 +9,7 @@ Regular Round
 .. toctree::
     :maxdepth: 1
 
+    #375 <cf375/index.rst>
     #372 <cf372/index.rst>
     #371 <cf371/index.rst>
     #369 <cf369/index.rst>

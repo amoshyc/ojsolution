@@ -29,6 +29,9 @@ Technique
 - tag_offline
 - tag_idastar
 - tag_doubling
+- tag_poset
+- tag_dilworth
+- tag_d&c
 
 ************************
 Data Structure
