@@ -1,0 +1,220 @@
+#####################################
+[POJ] 3686. The Windy's
+#####################################
+
+.. sidebar:: Tags
+
+    - ``tag_min_cost_flow``
+
+.. contents:: TOC
+    :depth: 2
+
+******************************************************
+`題目 <http://poj.org/problem?id=3686>`_
+******************************************************
+
+有 N 個玩具，M 個工廠，第 i 個玩具在第 j 個工廠製造所需時間為 Z[i][j]。
+每個工廠每個時間只能製造一個玩具，玩具與玩具間不需停頓。
+請分配各個玩具要在哪個工廠製造，使得總花費時間最小。
+
+************************
+Specification
+************************
+
+::
+
+    1 <= N, M <= 50
+    1 <= Z[i][j] <= 10^5
+
+************************
+分析
+************************
+
+.. note:: 最小費用流
+
+重要性質::
+
+    第 i 個玩具在第 j 個工廠中是第 k 個（1-based）被製造，且第 j 個工廠共要製造 NN 個點，
+    則這個玩具共貢獻 Z[i][j] * (NN - k + 1) 時間。
+
+根據這個性質可以這樣建圖::
+
+    1. 每個工廠轉成 N 個節點，分別代表 1 倍、2 倍、... 、N 倍時間
+    2. 針對每個玩具 u，每個工廠節點 v（x 倍）建邊 <u, v, 1, Z[i][j] * (x + 1)>
+
+補上超級源點、匯點，在這個網路上跑流量為 N 的最小費用流即為答案。
+
+例如測資::
+
+    3 2
+    10 12
+    20 5
+    15 10
+
+轉成圖（只顯示玩具 1）:
+
+.. image:: http://i.imgur.com/drf1rh2.png
+
+整個圖（沒顯示容量與成本）：
+
+.. image:: http://i.imgur.com/Q9wgJzL.png
+
+得到結果:
+
+.. image:: http://i.imgur.com/ZqmzCmu.png
+
+代表::
+
+    玩具 1 是在工廠 1 製造。
+    玩具 2 是在工廠 2 製造（工廠 2 第 2 個製造的玩具，時間被算 1 次）
+    玩具 3 是在工廠 2 製造（工廠 2 第 1 個製造的玩具，時間被算 2 次）
+
+注意，上面第二、第三行沒有打錯。時間被算越多次的是在該工廠中越早被製造。
+
+------------
+
+這題事實上是要輸出玩具平均的最小成本，而不是總和的最小成本，不過這就是除以個 N 就可以了。
+
+************************
+AC Code
+************************
+
+.. code-block:: cpp
+    :linenos:
+
+    #include <cstdio>
+    #include <cstring>
+    #include <cstdlib>
+    #include <cmath>
+    #include <vector>
+    #include <queue>
+    #include <algorithm>
+    using namespace std;
+
+    #define sz(x) (int(x.size()))
+    #define st first
+    #define nd second
+    typedef pair<int, int> pii;
+
+    const int INF = 0x3f3f3f3f;
+    const int MAX_N = 50; // number of toys
+    const int MAX_M = 50; // number of factories
+    const int MAX_V = MAX_N * MAX_M + MAX_N + 2;
+
+    struct Edge {
+        int to, cap, cost, rev;
+    };
+
+    int N, M, V;
+    vector<Edge> g[MAX_V];
+    int d[MAX_V];
+    int h[MAX_V];
+    int prevv[MAX_V];
+    int preve[MAX_V];
+
+    int Z[MAX_N][MAX_M];
+
+    void add_edge(int u, int v, int cap, int cost) {
+        g[u].push_back((Edge) {v, cap, cost, sz(g[v])});
+        g[v].push_back((Edge) {u, 0, -cost, sz(g[v]) - 1});
+    }
+
+    void fix_dijkstra(int s) {
+        fill(d, d + V, INF);
+        priority_queue< pii, vector<pii>, greater<pii> > pq;
+
+        d[s] = 0;
+        pq.push(pii(d[s], s));
+
+        while (!pq.empty()) {
+            pii p = pq.top(); pq.pop();
+            int v = p.nd;
+            if (d[v] < p.st) continue;
+            for (int i = 0; i < sz(g[v]); i++) {
+                const Edge& e = g[v][i];
+                if (e.cap > 0 && d[e.to] > d[v] + e.cost + h[v] - h[e.to]) {
+                    d[e.to] = d[v] + e.cost + h[v] - h[e.to];
+                    prevv[e.to] = v;
+                    preve[e.to] = i;
+                    pq.push(pii(d[e.to], e.to));
+                }
+            }
+        }
+    }
+
+    int min_cost_flow(int s, int t, int f) {
+        int res = 0;
+        fill(h, h + V, 0);
+        while (f > 0) {
+            fix_dijkstra(s);
+
+            if (d[t] == INF) return -1;
+
+            for (int v = 0; v < V; v++)
+                h[v] += d[v];
+
+            int bn = f;
+            for (int v = t; v != s; v = prevv[v])
+                bn = min(bn, g[prevv[v]][preve[v]].cap);
+
+            f -= bn;
+            res += bn * h[t];
+            for (int v = t; v != s; v = prevv[v]) {
+                Edge& e = g[prevv[v]][preve[v]];
+                e.cap -= bn;
+                g[v][e.rev].cap += bn;
+            }
+        }
+        return res;
+    }
+
+    int main() {
+        int TC;
+        scanf("%d", &TC);
+
+        while (TC--) {
+            scanf("%d %d", &N, &M);
+            V = N * M + N + 2;
+            int s = N * M + N + 0;
+            int t = N * M + N + 1;
+            // factory[j]: [j * N, j * N + N)
+            // toys: [N * M, N * M + N)
+
+            for (int v = 0; v < V; v++)
+                g[v].clear();
+            fill(prevv, prevv + V, -1);
+            fill(preve, preve + V, -1);
+
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < M; j++) {
+                    scanf("%d", &Z[i][j]);
+                }
+            }
+
+            for (int i = 0; i < N; i++) {
+                int toy_id = N * M + i;
+                add_edge(s, toy_id, 1, 0);
+            }
+
+            for (int i = 0; i < N; i++) {
+                int toy_id = N * M + i;
+                for (int j = 0; j < M; j++) {
+                    for (int k = 0; k < N; k++) {
+                        int fac_id = j * N + k;
+                        add_edge(toy_id, fac_id, 1, Z[i][j] * (k + 1));
+                    }
+                }
+            }
+
+            for (int j = 0; j < M; j++) {
+                for (int k = 0; k < N; k++) {
+                    int fac_id = j * N + k;
+                    add_edge(fac_id, t, 1, 0);
+                }
+            }
+
+            printf("%.6f\n", double(min_cost_flow(s, t, N)) / N);
+        }
+
+        return 0;
+    }
