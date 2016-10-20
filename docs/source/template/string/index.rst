@@ -7,3 +7,4 @@ String
 
     kmp.rst
     ac.rst
+    util.rst

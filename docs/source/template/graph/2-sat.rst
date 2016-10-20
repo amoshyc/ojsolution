@@ -26,7 +26,7 @@
     // ~xi -> xj
     // ~xj -> xi
 
-    tarjan(); // scc 建立的順序是倒序的拓璞排序
+    tarjan(V); // scc 建立的順序是倒序的拓璞排序
     for (int i = 0; i < 2 * N; i += 2) {
         if (belong[i] == belong[i ^ 1]) {
             // 無解
